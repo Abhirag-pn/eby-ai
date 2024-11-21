@@ -1,6 +1,6 @@
 
-import 'dart:developer';
 
+import 'package:eby/utils/authservice.dart';
 import 'package:eby/widgets/bouncingiconbutton.dart';
 import 'package:eby/widgets/bouncingtextbutton.dart';
 import 'package:flutter/material.dart';
@@ -14,13 +14,35 @@ class MainMenu extends StatefulWidget {
   State<MainMenu> createState() => _MainMenuState();
 }
 
-class _MainMenuState extends State<MainMenu> {
+class _MainMenuState extends State<MainMenu> with WidgetsBindingObserver {
+
+
 
 
 @override
+  void didChangeAppLifecycleState(AppLifecycleState state) {
+    if(state==AppLifecycleState.paused)
+    {
+      AudioHelper.instance.pauseBackgroundMusic();
+    }
+    if(state==AppLifecycleState.resumed)
+    {
+      AudioHelper.instance.resumeMusic();
+    }
+    super.didChangeAppLifecycleState(state);
+  }
+@override
   void initState() {
+    WidgetsBinding.instance.addObserver(this);
     AudioHelper.instance.playMusic();
     super.initState();
+  }
+
+  @override
+  void dispose() {
+   WidgetsBinding.instance.removeObserver(this);
+   AudioHelper.instance.disposeMusicPlayer();
+    super.dispose();
   }
 
 
@@ -38,10 +60,14 @@ class _MainMenuState extends State<MainMenu> {
                 const Spacer(),
                   Align(
                     alignment: Alignment.center,
-                    child: Image.asset("assets/images/mmheader.png",scale: MediaQuery.of(context).size.height/300)),
-                     BouncingTextButton(button:"assets/images/login.png" ,action: (){},),
+                    child: Image.asset("assets/images/mmheader.png",height: MediaQuery.of(context).size.height/2.2)),
+                     BouncingTextButton(button:"assets/images/login.png" ,action: (){
+                      Authservice.signInWithGoogle(context);
+                     },),
                     const SizedBox(height:12 ,),
-                    BouncingTextButton(button:"assets/images/exit.png" ,action: (){},),
+                    BouncingTextButton(button:"assets/images/exit.png" ,action: (){
+                      AudioHelper.instance.disposeMusicPlayer();
+                    },),
                     SizedBox(height:MediaQuery.of(context).size.height/18 ,),
                     Row(
                       mainAxisAlignment: MainAxisAlignment.center,

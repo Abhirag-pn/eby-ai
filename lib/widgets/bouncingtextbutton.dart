@@ -42,7 +42,7 @@ class _BouncingTextButtonState extends State<BouncingTextButton>
 
   @override
   void dispose() {
-    AudioHelper.instance.dispose();
+    AudioHelper.instance.disposeButtonPlayer();
    _controller.dispose();
     super.dispose();
   }

@@ -1,0 +1,29 @@
+{
+  "project_info": {
+    "project_number": "967740494664",
+    "project_id": "eby-ai",
+    "storage_bucket": "eby-ai.firebasestorage.app"
+  },
+  "client": [
+    {
+      "client_info": {
+        "mobilesdk_app_id": "1:967740494664:android:b3c06362d6258001f5597d",
+        "android_client_info": {
+          "package_name": "com.example.eby"
+        }
+      },
+      "oauth_client": [],
+      "api_key": [
+        {
+          "current_key": "AIzaSyCGFdK0Wm_gM51M0roaFIhaxTfcSeqWTy8"
+        }
+      ],
+      "services": {
+        "appinvite_service": {
+          "other_platform_oauth_client": []
+        }
+      }
+    }
+  ],
+  "configuration_version": "1"
+}
