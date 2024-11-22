@@ -42,7 +42,7 @@ class _MainMenuState extends State<MainMenu> with WidgetsBindingObserver {
   @override
   void dispose() {
    WidgetsBinding.instance.removeObserver(this);
-   
+   AudioHelper.instance.pauseBackgroundMusic();
     super.dispose();
   }
 

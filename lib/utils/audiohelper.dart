@@ -95,9 +95,19 @@ class AudioHelper {
     }catch(e){Logger().e(e.toString());}
   }
 
+Future<void> reduceMusicVol() async {try{
+    _musicPlayer.setVolume(0.02);
+  }catch(e){Logger().e(e.toString());}}
+
+Future<void> increaseMusicVol() async {try{
+    _musicPlayer.setVolume(0.2);
+  }catch(e){Logger().e(e.toString());}}
+
+
   // Play button click sound
 Future<void> playTextButtonClick() async {try{
     await _buttonPlayer.setSource(AssetSource('sounds/buttonclick.mp3'));
     _buttonPlayer.resume();
   }catch(e){Logger().e(e.toString());}}
 }
+
