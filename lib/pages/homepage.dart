@@ -2,9 +2,11 @@ import 'dart:developer';
 
 import 'package:eby/utils/audiohelper.dart';
 import 'package:eby/utils/hotwordmanager.dart';
+import 'package:eby/utils/ttsservice.dart';
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/material.dart';
 import 'package:logger/web.dart';
+import 'package:provider/provider.dart';
 
 
 class Homepage extends StatefulWidget {
@@ -15,6 +17,9 @@ class Homepage extends StatefulWidget {
 }
 
 class _HomepageState extends State<Homepage> {
+  final _speechController=TextEditingController();
+  late final ttsService ;
+  bool isInitialised=false;
   // bool isActive = false;
   // late HotwordManager _hotwordManager;
 
@@ -25,13 +30,15 @@ class _HomepageState extends State<Homepage> {
   //   });
   // }
 
-  // @override
-  // void initState() {
-  //   super.initState();
-    
-  //   _hotwordManager = HotwordManager(onHotwordDetected: _wakeWordCallback);
-  //   _hotwordManager.initialize();
-  // }
+
+
+  @override
+  void initState() {
+    super.initState();
+  
+    // _hotwordManager = HotwordManager(onHotwordDetected: _wakeWordCallback);
+    // _hotwordManager.initialize();
+  }
 
   // @override
   // void dispose() {
@@ -48,8 +55,13 @@ class _HomepageState extends State<Homepage> {
         mainAxisAlignment: MainAxisAlignment.center,
         crossAxisAlignment: CrossAxisAlignment.center,
         children: [
-          TextField(),
-          ElevatedButton(onPressed: (){}, child: Text("Speak")),
+          TextField(
+            controller: _speechController,
+          ),
+          ElevatedButton(onPressed: (){
+            log("clicked");
+           Provider.of<TtsService>(context,listen: false).speak(_speechController.text);
+          }, child: Text("Speak")),
           ElevatedButton(onPressed: ()async{
             try{
               AudioHelper.instance.resumeMusic();
