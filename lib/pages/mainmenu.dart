@@ -4,6 +4,7 @@ import 'package:eby/utils/authservice.dart';
 import 'package:eby/widgets/bouncingiconbutton.dart';
 import 'package:eby/widgets/bouncingtextbutton.dart';
 import 'package:flutter/material.dart';
+import 'package:logger/web.dart';
 
 import '../utils/audiohelper.dart';
 
@@ -41,7 +42,7 @@ class _MainMenuState extends State<MainMenu> with WidgetsBindingObserver {
   @override
   void dispose() {
    WidgetsBinding.instance.removeObserver(this);
-   AudioHelper.instance.disposeMusicPlayer();
+   
     super.dispose();
   }
 
@@ -62,10 +63,12 @@ class _MainMenuState extends State<MainMenu> with WidgetsBindingObserver {
                     alignment: Alignment.center,
                     child: Image.asset("assets/images/mmheader.png",height: MediaQuery.of(context).size.height/2.2)),
                      BouncingTextButton(button:"assets/images/login.png" ,action: (){
-                      Authservice.signInWithGoogle(context);
+                      try{Authservice.signInWithGoogle(context);}
+                      catch(e)
+                      {Logger().e(e.toString());}
                      },),
                     const SizedBox(height:12 ,),
-                    BouncingTextButton(button:"assets/images/exit.png" ,action: (){
+                    BouncingTextButton(button:"assets/images/exit.png",action: (){
                       AudioHelper.instance.disposeMusicPlayer();
                     },),
                     SizedBox(height:MediaQuery.of(context).size.height/18 ,),

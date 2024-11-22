@@ -9,10 +9,23 @@
       "client_info": {
         "mobilesdk_app_id": "1:967740494664:android:b3c06362d6258001f5597d",
         "android_client_info": {
-          "package_name": "com.example.eby"
+          "package_name": "eby.ai"
         }
       },
-      "oauth_client": [],
+      "oauth_client": [
+        {
+          "client_id": "967740494664-jbmc3q4crir7tv0oq21aj16kjf196kb7.apps.googleusercontent.com",
+          "client_type": 1,
+          "android_info": {
+            "package_name": "eby.ai",
+            "certificate_hash": "1161cd50cadad34518f48ddb8d482992e4d43e33"
+          }
+        },
+        {
+          "client_id": "967740494664-ibrlq5g5jnhf568ev9def2kvbh7pd03v.apps.googleusercontent.com",
+          "client_type": 3
+        }
+      ],
       "api_key": [
         {
           "current_key": "AIzaSyCGFdK0Wm_gM51M0roaFIhaxTfcSeqWTy8"
@@ -20,7 +33,12 @@
       ],
       "services": {
         "appinvite_service": {
-          "other_platform_oauth_client": []
+          "other_platform_oauth_client": [
+            {
+              "client_id": "967740494664-ibrlq5g5jnhf568ev9def2kvbh7pd03v.apps.googleusercontent.com",
+              "client_type": 3
+            }
+          ]
         }
       }
     }
