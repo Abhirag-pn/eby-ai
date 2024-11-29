@@ -1,6 +1,7 @@
 import 'package:eby/pages/homepage.dart';
 import 'package:eby/pages/mainmenu.dart';
 import 'package:eby/pages/pageresolver.dart';
+import 'package:eby/utils/sttservice.dart';
 import 'package:eby/utils/ttsservice.dart';
 import 'package:firebase_core/firebase_core.dart';
 import 'package:flutter/material.dart';
@@ -9,8 +10,11 @@ import 'package:provider/provider.dart';
 void main()async {
   WidgetsFlutterBinding.ensureInitialized();
   await Firebase.initializeApp();
-  runApp(ChangeNotifierProvider(
-      create: (context) => TtsService()..initialize(),
+  runApp(MultiProvider(
+      providers: [
+        ChangeNotifierProvider(create: (_) => TtsService()..initialize()),
+        ChangeNotifierProvider(create: (_) => SpeechToTextService()..initialize()),
+      ],
       child: const MyApp(),
     )
     );
