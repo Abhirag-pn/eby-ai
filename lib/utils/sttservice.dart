@@ -6,9 +6,9 @@ class SpeechToTextService with ChangeNotifier {
   final SpeechToText _speechToText = SpeechToText();
   bool _speechEnabled = false;
   bool _isListening = false;
-  String _lastWords = '';
+  String _wordsSpoken = '';
 
-  String get lastWords => _lastWords;
+  String get wordsSpoken => _wordsSpoken;
   bool get isListening => _isListening;
   bool get speechEnabled => _speechEnabled;
 
@@ -20,7 +20,12 @@ class SpeechToTextService with ChangeNotifier {
   Future<void> startListening() async {
     if (_speechEnabled && !_isListening) {
       _isListening = true;
-      await _speechToText.listen(onResult: _onSpeechResult);
+  
+      await _speechToText.listen(
+        onResult: _onSpeechResult,
+        listenFor:const Duration(seconds: 60), // Stop after 60 seconds
+        pauseFor:const  Duration(seconds: 3), // Pause for 3 seconds before auto-stop
+      );
       notifyListeners();
     }
   }
@@ -34,7 +39,12 @@ class SpeechToTextService with ChangeNotifier {
   }
 
   void _onSpeechResult(SpeechRecognitionResult result) {
-    _lastWords = result.recognizedWords;
+    _wordsSpoken = result.recognizedWords;
+    notifyListeners();
+  }
+
+  void clearLastWords() {
+    _wordsSpoken = '';
     notifyListeners();
   }
 }

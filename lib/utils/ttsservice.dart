@@ -5,12 +5,7 @@ class TtsService with ChangeNotifier {
   final FlutterTts _flutterTts = FlutterTts();
   bool isSpeaking = false;
 
-  Future<void> initialize() async {
-    await _flutterTts.setLanguage("en-US");
-    await _flutterTts.setSpeechRate(0.5);
-    await _flutterTts.setVolume(1.0);
-    await _flutterTts.setPitch(1.0);
-
+  TtsService() {
     _flutterTts.setStartHandler(() {
       isSpeaking = true;
       notifyListeners();
@@ -27,7 +22,16 @@ class TtsService with ChangeNotifier {
     });
   }
 
+  
+  Future<void> initialize() async {
+    await _flutterTts.setLanguage("en-US"); // Set language to English
+    await _flutterTts.setSpeechRate(0.5); // Set speech rate (optional)
+    await _flutterTts.setVolume(1.0); // Set volume to maximum (optional)
+    await _flutterTts.setPitch(1.0); // Set pitch (optional)
+  }
+
   Future<void> speak(String text) async {
+    await _flutterTts.stop();  // Stop any ongoing speech
     await _flutterTts.speak(text);
   }
 
