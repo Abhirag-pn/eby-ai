@@ -3,7 +3,7 @@ import 'dart:developer';
 
 import 'package:eby/utils/geminiservice.dart';
 import 'package:eby/utils/ttsservice.dart';
-import 'package:flutter/foundation.dart';
+import 'package:flutter/material.dart';
 import 'package:logger/logger.dart';
 import 'package:speech_to_text/speech_recognition_result.dart';
 import 'package:speech_to_text/speech_to_text.dart';
@@ -14,6 +14,7 @@ class SpeechToTextService with ChangeNotifier {
   bool _isListening = false;
   String _wordsSpoken = '';
   Completer<String>? _listeningCompleter;
+  Timer? _listenTimeoutTimer;
 
   String get wordsSpoken => _wordsSpoken;
   bool get isListening => _isListening;
@@ -26,8 +27,7 @@ class SpeechToTextService with ChangeNotifier {
 
   Future<String> startListening() async {
     if (_listeningCompleter?.isCompleted == false) {
-      // Cancel the previous completer if it hasn't completed
-      _listeningCompleter = null;
+      _listeningCompleter = null; // Cancel the previous completer if it hasn't completed
     }
 
     if (_speechEnabled && !_isListening) {
@@ -36,15 +36,20 @@ class SpeechToTextService with ChangeNotifier {
       _listeningCompleter = Completer<String>();
 
       await _speechToText.listen(
+       
         onResult: _onSpeechResult,
-        listenFor: const Duration(seconds: 60), // Stop after 60 seconds
-        pauseFor:
-            const Duration(seconds: 3), // Pause for 3 seconds before auto-stop
+        listenFor: const Duration(seconds: 60), // Listen for 60 seconds (can be adjusted)
+        pauseFor: const Duration(seconds: 3), // Pause for 3 seconds before auto-stop
       );
 
-      notifyListeners();
+      // Start the timeout timer to stop listening after a set time
+      _listenTimeoutTimer = Timer(const Duration(seconds: 60), () async {
+        if (_isListening) {
+          await stopListening();
+        }
+      });
 
-      // Return the future that will complete when the final result is received
+      notifyListeners();
       return _listeningCompleter!.future;
     } else {
       throw Exception("Speech recognition not enabled or already listening.");
@@ -55,12 +60,13 @@ class SpeechToTextService with ChangeNotifier {
     if (_isListening) {
       _isListening = false;
       await _speechToText.stop();
+      _listenTimeoutTimer?.cancel(); // Cancel the timeout timer
 
       if (_listeningCompleter?.isCompleted == false) {
         _listeningCompleter?.complete(_wordsSpoken);
       }
 
-      notifyListeners();
+      notifyListeners(); // Make sure to notify listeners to update the UI when stopped
     }
   }
 
@@ -69,25 +75,21 @@ class SpeechToTextService with ChangeNotifier {
     if (result.finalResult) {
       if (_listeningCompleter?.isCompleted == false) {
         _listeningCompleter?.complete(_wordsSpoken);
-      }
-
-      // Process with Gemini and TTS
-      try {
-        final gemini = GeminiService();
-        final tts = TtsService();
-        final res = await gemini.sendMessage(result.recognizedWords);
-        log(result.recognizedWords);
-        await tts.speak(res);
-      } on Exception catch (e, s) {
-        Logger().e(e);
-        Logger().e(s);
+        _isListening = false;  // Update the listening state when result is final
+        notifyListeners();
       }
     }
-    notifyListeners();
+    notifyListeners(); // Ensure the UI updates with the recognized words
   }
 
   void clearLastWords() {
     _wordsSpoken = '';
-    notifyListeners();
+    notifyListeners(); // Clear words and update UI
+  }
+
+  @override
+  void dispose() {
+    _listenTimeoutTimer?.cancel(); // Make sure to cancel the timer when disposed
+    super.dispose();
   }
 }

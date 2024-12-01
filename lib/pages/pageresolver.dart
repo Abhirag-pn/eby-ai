@@ -1,3 +1,4 @@
+import 'package:eby/pages/characterpage.dart';
 import 'package:eby/pages/homepage.dart';
 import 'package:eby/pages/mainmenu.dart';
 import 'package:firebase_auth/firebase_auth.dart';
@@ -20,7 +21,7 @@ class PageResolver extends StatelessWidget {
           );
         } else if (snapshot.hasData) {
           // If user is signed in, navigate to Homepage
-          return const Homepage();
+          return const CharacterPage();
         } else if (snapshot.hasError) {
           // Handle errors gracefully
           return const Scaffold(

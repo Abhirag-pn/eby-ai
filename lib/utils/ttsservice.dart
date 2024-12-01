@@ -33,6 +33,8 @@ class TtsService with ChangeNotifier {
   Future<void> speak(String text) async {
     await _flutterTts.stop();  // Stop any ongoing speech
     await _flutterTts.speak(text);
+    await _flutterTts.awaitSpeakCompletion(true);
+
   }
 
   Future<void> stop() async {

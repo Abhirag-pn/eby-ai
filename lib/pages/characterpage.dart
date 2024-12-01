@@ -1,7 +1,7 @@
 import 'dart:developer';
-
 import 'package:eby/utils/geminiservice.dart';
-import 'package:flutter/foundation.dart';
+import 'package:eby/widgets/bouncingiconbutton.dart';
+import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
 import 'package:rive/rive.dart' as rive;
@@ -17,22 +17,22 @@ class CharacterPage extends StatefulWidget {
 }
 
 class _CharacterPageState extends State<CharacterPage> {
-
   @override
   void initState() {
-    GeminiService().initialize();
     super.initState();
+    GeminiService().initialize();
   }
-   rive.SMITrigger? startlisten,startthink,startspeak,startidle;
 
-   void onRiveEvent(rive.RiveEvent event) {
+  late rive.StateMachineController ctrl;
+  rive.SMITrigger? startlisten, startthink, startspeak, startidle;
+
+  void onRiveEvent(rive.RiveEvent event) {
     print(event);
   }
 
-
-  void _onInit(rive.Artboard art)
-  {
-    var ctrl=rive.StateMachineController.fromArtboard(art,'eby_state_machine') as rive.StateMachineController;
+  void _onInit(rive.Artboard art) {
+    ctrl = rive.StateMachineController.fromArtboard(art, 'eby_state_machine')
+        as rive.StateMachineController;
 
     ctrl.addEventListener(onRiveEvent);
     startlisten = ctrl.getTriggerInput('start listening');
@@ -42,52 +42,72 @@ class _CharacterPageState extends State<CharacterPage> {
 
     art.addController(ctrl);
     setState(() {});
-
   }
+
   @override
   Widget build(BuildContext context) {
-        final speechService = Provider.of<SpeechToTextService>(context);
-  
+    final speechService = Provider.of<SpeechToTextService>(context);
     final ttsService = Provider.of<TtsService>(context, listen: false);
+
     return Scaffold(
-      body: SizedBox(
+      body: Container(
+        decoration: BoxDecoration(
+            image: DecorationImage(
+                image: AssetImage(
+                  'assets/images/bg.png',
+                ),
+                fit: BoxFit.cover)),
         height: MediaQuery.of(context).size.height,
         width: MediaQuery.of(context).size.width,
         child: Stack(
           children: [
-            Image.asset('assets/images/bg.png',fit: BoxFit.fill,),
-            rive.RiveAnimation.asset('assets/rive/eby.riv',onInit: _onInit,),
-            Align(
-              alignment: Alignment.bottomCenter,
-              child: Row(
-                mainAxisSize: MainAxisSize.max,
-                mainAxisAlignment:MainAxisAlignment.center,
-                children: [
-                  ElevatedButton(onPressed: ()
-                 async {
-                    
-                     if (speechService.isListening) {
-                  await speechService.stopListening();
-                  
-                } else {
-                  startlisten!.fire();
-                  final result =await speechService.startListening();
-                  log("stopped listening");
-                  startthink!.fire();
-                 final res= await GeminiService.instance.sendMessage(result);
-                 startspeak!.fire();
-                 await ttsService.speak(res);
-                 startidle!.fire();
+            rive.RiveAnimation.asset('assets/rive/eby.riv', onInit: _onInit),
+            Padding(
+              padding: const EdgeInsets.only(bottom: 20.0),
+              child: Align(
+                alignment: Alignment.bottomCenter,
+                child: Column(
+                  mainAxisAlignment: MainAxisAlignment.end,
+                  mainAxisSize: MainAxisSize.max,
+                  children: [
+                    Text(speechService.wordsSpoken,style: Theme.of(context).textTheme.labelLarge!.copyWith(color: Colors.white),),
+                    SizedBox(height: 30,),
+                    BouncingIconButton(
+                        button: speechService.isListening
+                            ? 'assets/images/listening.png'
+                            : 'assets/images/mic.png',
+                        action: () async {
+                          setState(() {});
 
-                  log(result);
-               
-                }
-                  }, child: Text("Listen")),
-                  ElevatedButton(onPressed: (){  startidle!.fire();}, child: Text("data"))
-                ],
+                          if (speechService.isListening) {
+                            await speechService.stopListening();
+                          } else {
+                            ttsService.stop();
+                            startlisten!.fire();
+                            final result = await speechService.startListening();
+                            log("stopped listening");
+                            startthink!.fire();
+                            final res = await GeminiService.instance
+                                .sendMessage(result);
+                            startspeak!.fire();
+                            await ttsService.speak(res);
+                            startidle!.fire(); // Adjust delay as needed
+                          }
+                        }),
+                  ],
+                ),
               ),
-            )
-
+             
+            ),
+             Padding(
+               padding: const EdgeInsets.only(top: 20.0,right: 10),
+               child: Align(
+                alignment: Alignment.topRight,
+                child: BouncingIconButton(button: "assets/images/exiticon.png", action: (){
+                  FirebaseAuth.instance.signOut();
+                }),
+               ),
+             )
           ],
         ),
       ),
