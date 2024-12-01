@@ -3,19 +3,25 @@ import 'package:flutter/material.dart';
 import 'package:flutter_dotenv/flutter_dotenv.dart';
 import 'package:google_generative_ai/google_generative_ai.dart';
 
-class GeminiService with ChangeNotifier {
+class GeminiService  {
   late final GenerativeModel _model;
   late final ChatSession _chatSession;
+
+  GeminiService._private();
+  static final instance=GeminiService._private();
+  factory GeminiService()
+  {
+    return instance;
+  }
 
   Future<void> initialize() async {
     try {
       _model = GenerativeModel(
         model: 'gemini-pro',
-        apiKey: "AIzaSyCOK_MLrbAU7odgdJU_wvQo9RopeA3KnAw"
+        apiKey: dotenv.get('API_KEY')
       );
 
       _chatSession = _model.startChat();
-      notifyListeners();
     } catch (e) {
       log("Initialization Error: ${e.toString()}");
       rethrow;

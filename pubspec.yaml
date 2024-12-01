@@ -47,6 +47,7 @@ dependencies:
   speech_to_text: ^7.0.0
   google_generative_ai: ^0.4.6
   flutter_dotenv: ^5.2.1
+  rive: ^0.13.19
 
 dev_dependencies:
   flutter_test:
@@ -75,6 +76,7 @@ flutter:
     - assets/Hey-Eby_en_android_v3_0_0.ppn
     - assets/images/
     - assets/sounds/
+    - assets/rive/
     - .env
   #   - images/a_dot_ham.jpeg
 

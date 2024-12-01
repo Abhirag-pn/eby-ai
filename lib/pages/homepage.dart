@@ -13,10 +13,17 @@ class Homepage extends StatefulWidget {
 }
 
 class _HomepageState extends State<Homepage> {
+
+
+  @override
+  void initState() {
+    GeminiService().initialize();
+    super.initState();
+  }
   @override
   Widget build(BuildContext context) {
     final speechService = Provider.of<SpeechToTextService>(context);
-    final geminiService = Provider.of<GeminiService>(context, listen: false);
+  
     final ttsService = Provider.of<TtsService>(context, listen: false);
 
     return Scaffold(
@@ -48,24 +55,21 @@ class _HomepageState extends State<Homepage> {
                  
                   await speechService.startListening();
                   log(speechService.wordsSpoken);
-                final text=  await geminiService.sendMessage(speechService.wordsSpoken);
-                log(text+"hello");
-                  await ttsService.speak(text);
-                  speechService.clearLastWords();
+                // final text=  await geminiService.sendMessage(speechService.wordsSpoken);
+                // log(text+"hello");
+                //   await ttsService.speak(text);
+                  // speechService.clearLastWords();
                 }
               },
               child: Text(speechService.isListening ? "Stop Listening" : "Start Listening"),
             ),
             ElevatedButton(
               onPressed: () async {
-                // When speech is detected, generate the response
-                if (speechService.wordsSpoken.isNotEmpty) {
-                  final response = await geminiService.sendMessage(speechService.wordsSpoken);
-                  final cleanedResponse = cleanResponse(response);
-                  log(cleanedResponse);
-                  ttsService.speak(cleanedResponse);
+            final res=await  GeminiService.instance.sendMessage("HELLO");
+            log(res);
+               await  TtsService().speak(res);
                 }
-              },
+              ,
               child: const Text("Ask Gemini"),
             ),
             ElevatedButton(

@@ -1,3 +1,4 @@
+import 'package:eby/pages/characterpage.dart';
 import 'package:eby/pages/homepage.dart';
 
 import 'package:eby/utils/geminiservice.dart';
@@ -16,7 +17,7 @@ void main()async {
       providers: [
         
         ChangeNotifierProvider(create: (_) => TtsService()..initialize()),
-        ChangeNotifierProvider(create: (_) => GeminiService()..initialize()),
+       
         ChangeNotifierProvider(create: (_) => SpeechToTextService()..initialize()),
       ],
       child: const MyApp(),
