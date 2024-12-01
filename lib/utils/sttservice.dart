@@ -36,7 +36,7 @@ class SpeechToTextService with ChangeNotifier {
       _listeningCompleter = Completer<String>();
 
       await _speechToText.listen(
-       
+       listenOptions: SpeechListenOptions(listenMode: ListenMode.dictation),
         onResult: _onSpeechResult,
         listenFor: const Duration(seconds: 60), // Listen for 60 seconds (can be adjusted)
         pauseFor: const Duration(seconds: 3), // Pause for 3 seconds before auto-stop

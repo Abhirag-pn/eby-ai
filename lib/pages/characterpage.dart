@@ -70,7 +70,7 @@ class _CharacterPageState extends State<CharacterPage> {
                   mainAxisAlignment: MainAxisAlignment.end,
                   mainAxisSize: MainAxisSize.max,
                   children: [
-                    Text(speechService.wordsSpoken,style: Theme.of(context).textTheme.labelLarge!.copyWith(color: Colors.white),),
+                    Text(speechService.isListening?speechService.wordsSpoken:"Click on the microphone to start " ,style: Theme.of(context).textTheme.labelLarge!.copyWith(color: Colors.white),),
                     SizedBox(height: 30,),
                     BouncingIconButton(
                         button: speechService.isListening
@@ -81,6 +81,9 @@ class _CharacterPageState extends State<CharacterPage> {
 
                           if (speechService.isListening) {
                             await speechService.stopListening();
+                             await ttsService.stop();
+                            startidle!.fire();
+                          
                           } else {
                             ttsService.stop();
                             startlisten!.fire();
@@ -104,6 +107,7 @@ class _CharacterPageState extends State<CharacterPage> {
                child: Align(
                 alignment: Alignment.topRight,
                 child: BouncingIconButton(button: "assets/images/exiticon.png", action: (){
+                   ttsService.dispose();
                   FirebaseAuth.instance.signOut();
                 }),
                ),
