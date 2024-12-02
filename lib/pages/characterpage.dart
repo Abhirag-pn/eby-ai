@@ -92,6 +92,15 @@ class _CharacterPageState extends State<CharacterPage> {
                 ],
               ),
             ),
+            Padding(
+              padding: const EdgeInsets.only(top: 20.0,right:10),
+              child: Align(
+                alignment: Alignment.topRight,
+              child: BouncingIconButton(button: 'assets/images/exiticon.png', action: (){
+                FirebaseAuth.instance.signOut();
+              }),
+              ),
+            )
           ],
         ),
       ),
