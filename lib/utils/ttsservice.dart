@@ -1,3 +1,4 @@
+import 'package:eby/utils/animationservice.dart';
 import 'package:flutter_tts/flutter_tts.dart';
 import 'package:flutter/material.dart';
 
@@ -13,16 +14,17 @@ class TtsService with ChangeNotifier {
 
     _flutterTts.setCompletionHandler(() {
       isSpeaking = false;
+      AnimationControllerService().triggerIdle();
       notifyListeners();
     });
 
     _flutterTts.setErrorHandler((message) {
       isSpeaking = false;
+      AnimationControllerService().triggerIdle();
       notifyListeners();
     });
   }
 
-  
   Future<void> initialize() async {
     await _flutterTts.setLanguage("en-US"); // Set language to English
     await _flutterTts.setSpeechRate(0.5); // Set speech rate (optional)
@@ -31,13 +33,15 @@ class TtsService with ChangeNotifier {
   }
 
   Future<void> speak(String text) async {
-    await _flutterTts.stop();  // Stop any ongoing speech
+    await _flutterTts.stop();
+    AnimationControllerService().triggerSpeak(); // Stop any ongoing speech
     await _flutterTts.speak(text);
     await _flutterTts.awaitSpeakCompletion(true);
-
+    
   }
 
   Future<void> stop() async {
+    AnimationControllerService().triggerIdle();
     await _flutterTts.stop();
   }
 }

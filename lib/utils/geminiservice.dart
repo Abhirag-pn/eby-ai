@@ -1,4 +1,5 @@
 import 'dart:developer';
+import 'package:eby/utils/animationservice.dart';
 import 'package:flutter_dotenv/flutter_dotenv.dart';
 import 'package:google_generative_ai/google_generative_ai.dart';
 
@@ -39,10 +40,12 @@ class GeminiService {
 
   Future<String> sendMessage(String userPrompt) async {
     try {
+      AnimationControllerService().triggerThink();
       final response = await _chatSession.sendMessage(Content.text(userPrompt));
       log("Response from Gemini: ${response.text!}");
       return response.text!;
     } catch (e) {
+      AnimationControllerService().triggerIdle();
       log("Message Error: ${e.toString()}");
       return "Error: Unable to process your request.";
     }
