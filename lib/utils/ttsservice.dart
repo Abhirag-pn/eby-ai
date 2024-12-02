@@ -7,7 +7,11 @@ class TtsService with ChangeNotifier {
   bool isSpeaking = false;
 
   TtsService() {
+
+
+     
     _flutterTts.setStartHandler(() {
+      AnimationControllerService().triggerSpeak();
       isSpeaking = true;
       notifyListeners();
     });
@@ -17,6 +21,15 @@ class TtsService with ChangeNotifier {
       AnimationControllerService().triggerIdle();
       notifyListeners();
     });
+
+  
+
+  _flutterTts.setCancelHandler(()
+  {
+    isSpeaking = false;
+      AnimationControllerService().triggerIdle();
+      notifyListeners();
+  });
 
     _flutterTts.setErrorHandler((message) {
       isSpeaking = false;
@@ -34,9 +47,9 @@ class TtsService with ChangeNotifier {
 
   Future<void> speak(String text) async {
     await _flutterTts.stop();
-    AnimationControllerService().triggerSpeak(); // Stop any ongoing speech
     await _flutterTts.speak(text);
     await _flutterTts.awaitSpeakCompletion(true);
+    
     
   }
 

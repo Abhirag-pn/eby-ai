@@ -56,7 +56,7 @@ class _CharacterPageState extends State<CharacterPage> {
                     style: Theme.of(context)
                         .textTheme
                         .labelLarge!
-                        .copyWith(color: Colors.white),
+                        .copyWith(color: Colors.black38,fontFamily: 'Bowl'),
                   ),
                   const SizedBox(height: 30),
                   BouncingIconButton(
@@ -71,8 +71,14 @@ class _CharacterPageState extends State<CharacterPage> {
                       } else {
                         ttsService.stop();
                         final result = await speechService.startListening();
+                        if(result=="")
+                        {  
+                           await ttsService.speak("I didnt get you.try again!");
+                           
+
+                        }else{
                         String? response =
-                            await GeminiService.instance.sendMessage(result);
+                            await GeminiService.instance.sendMessage(result!);
                             if(response.isEmpty||response==""){
                               response="I didnt get you.try again!";
                             }else
@@ -80,7 +86,7 @@ class _CharacterPageState extends State<CharacterPage> {
                               await ttsService.speak(response);
                             }
                         
-                      }
+                      }}
                     },
                   ),
                 ],
