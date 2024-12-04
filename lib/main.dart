@@ -1,5 +1,6 @@
 import 'package:eby/pages/characterpage.dart';
 import 'package:eby/pages/homepage.dart';
+import 'package:eby/pages/mainmenu.dart';
 import 'package:eby/pages/pageresolver.dart';
 import 'package:eby/utils/animationservice.dart';
 
@@ -42,7 +43,7 @@ class MyApp extends StatelessWidget {
         colorScheme: ColorScheme.fromSeed(seedColor: Colors.deepPurple),
         useMaterial3: true,
       ),
-      home: const PageResolver()
+      home: const MainMenu()
     );
   }
 }

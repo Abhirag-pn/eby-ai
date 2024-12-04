@@ -4,6 +4,7 @@ import 'package:eby/utils/geminiservice.dart';
 import 'package:eby/widgets/bouncingiconbutton.dart';
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/material.dart';
+import 'package:flutter_speed_dial/flutter_speed_dial.dart';
 import 'package:provider/provider.dart';
 import 'package:rive/rive.dart' as rive;
 
@@ -18,6 +19,7 @@ class CharacterPage extends StatefulWidget {
 }
 
 class _CharacterPageState extends State<CharacterPage> {
+ 
   @override
   void initState() {
     GeminiService().initialize();
@@ -27,7 +29,7 @@ class _CharacterPageState extends State<CharacterPage> {
   @override
   void dispose() {
     AnimationControllerService().dispose();
-    TtsService().dispose();
+    TtsService().stop();
     SpeechToTextService().dispose();
     super.dispose();
   }
@@ -85,16 +87,7 @@ class _CharacterPageState extends State<CharacterPage> {
                 },
               ),
             ),
-            Padding(
-              padding: const EdgeInsets.only(top: 20.0,right:10),
-              child: Align(
-                alignment: Alignment.topRight,
-              child: BouncingIconButton(button: 'assets/images/exiticon.png', action: (){
-                FirebaseAuth.instance.signOut();
-              }),
-              ),
-              
-            ),
+           
             Padding(
               
               padding:  EdgeInsets.only(top: MediaQuery.of(context).size.height/7),
@@ -110,7 +103,27 @@ class _CharacterPageState extends State<CharacterPage> {
                           .copyWith(color: Colors.black38,fontFamily: 'Bowl'),
                     ),
               ),
-            )
+            ),
+             Padding(
+              padding: const EdgeInsets.only(top: 20.0,right:10),
+              child: Align(
+                alignment: Alignment.topRight,
+              child:SpeedDial(
+                backgroundColor: Colors.transparent,
+              
+                child:  BouncingIconButton(button: "assets/images/settingsicon.png", action: (){}),
+                overlayColor: Colors.black26,
+                direction: SpeedDialDirection.down,
+                children: [
+                  SpeedDialChild(
+                    backgroundColor: Colors.transparent,
+                     child: BouncingIconButton(button: "assets/images/exiticon.png", action: (){})
+                  )
+                ],
+              )
+              ),
+              
+            ),
           ],
         ),
       ),
