@@ -25,7 +25,7 @@ class GeminiService {
 
     try {
       _model = GenerativeModel(
-        model: 'gemini-pro',
+        model: 'gemini-1.5-flash',
         apiKey: dotenv.get('API_KEY'),
       );
 
@@ -48,7 +48,7 @@ class GeminiService {
 
       // If not a custom phrase, forward the request to Gemini
       AnimationControllerService().triggerThink();
-      final geminiResponse = await _chatSession.sendMessage(Content.text(userPrompt));
+      final geminiResponse = await _chatSession.sendMessage(Content.text(userPrompt,),);
       log("Response from Gemini: ${geminiResponse.text!}");
 
       // Clean the response before returning
@@ -72,7 +72,9 @@ class GeminiService {
       "tell me about you",
       "who is this",
       "are you there",
-      "what's your purpose"
+      "what's your purpose",
+      "what is your name",
+      "your name"
     ];
 
     // Check if the user's prompt contains any of the trigger phrases

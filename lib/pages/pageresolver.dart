@@ -1,5 +1,4 @@
 import 'package:eby/pages/characterpage.dart';
-import 'package:eby/pages/homepage.dart';
 import 'package:eby/pages/mainmenu.dart';
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/material.dart';

@@ -1,3 +1,5 @@
+import 'dart:developer';
+
 import 'package:eby/utils/authservice.dart';
 import 'package:eby/widgets/bouncingiconbutton.dart';
 import 'package:eby/widgets/bouncingtextbutton.dart';
@@ -28,6 +30,7 @@ class _MainMenuState extends State<MainMenu> with WidgetsBindingObserver {
 
   @override
   void initState() {
+    log("INIT STARTED");
     WidgetsBinding.instance.addObserver(this);
     AudioHelper.instance.playMusic();
     super.initState();
@@ -36,7 +39,7 @@ class _MainMenuState extends State<MainMenu> with WidgetsBindingObserver {
   @override
   void dispose() {
     WidgetsBinding.instance.removeObserver(this);
-    AudioHelper.instance.pauseBackgroundMusic();
+    AudioHelper.instance.stopBackgroundMusic();
     super.dispose();
   }
 
@@ -46,7 +49,7 @@ class _MainMenuState extends State<MainMenu> with WidgetsBindingObserver {
       
         backgroundColor: Colors.lightBlueAccent,
         body: Container(
-          decoration: BoxDecoration(image: DecorationImage(image: AssetImage('assets/images/bg.jpg',),fit: BoxFit.cover),),
+          decoration: const BoxDecoration(image: DecorationImage(image: AssetImage('assets/images/bg.jpg',),fit: BoxFit.cover),),
           child: Stack(children: [
             const SizedBox(),
             Column(

@@ -119,7 +119,7 @@ class _CharacterPageState extends State<CharacterPage> {
                     FirebaseAuth.instance.signOut();})
             ),),
             if(_isLoading)Container(
-                decoration: BoxDecoration(color: Colors.amber),
+                decoration: const BoxDecoration(color: Colors.black),
                 height: double.infinity,
                 width: double.infinity,
                 child: Center(
