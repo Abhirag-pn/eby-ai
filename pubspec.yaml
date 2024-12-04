@@ -48,6 +48,7 @@ dependencies:
   google_generative_ai: ^0.4.6
   flutter_dotenv: ^5.2.1
   rive: ^0.13.19
+  flutter_speed_dial: ^7.0.0
 
 dev_dependencies:
   flutter_test:

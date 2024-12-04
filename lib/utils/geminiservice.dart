@@ -40,14 +40,69 @@ class GeminiService {
 
   Future<String> sendMessage(String userPrompt) async {
     try {
+      // Check if the user's prompt contains any custom phrases
+      String response = await _handleCustomPhrases(userPrompt);
+      if (response.isNotEmpty) {
+        return response; // Return custom response without sending to Gemini
+      }
+
+      // If not a custom phrase, forward the request to Gemini
       AnimationControllerService().triggerThink();
-      final response = await _chatSession.sendMessage(Content.text(userPrompt));
-      log("Response from Gemini: ${response.text!}");
-      return response.text!;
+      final geminiResponse = await _chatSession.sendMessage(Content.text(userPrompt));
+      log("Response from Gemini: ${geminiResponse.text!}");
+
+      // Clean the response before returning
+      String cleanedResponse = cleanResponse(geminiResponse.text!);
+
+      return cleanedResponse;
     } catch (e) {
       AnimationControllerService().triggerIdle();
       log("Message Error: ${e.toString()}");
       return "Error: Unable to process your request.";
     }
+  }
+
+  // Method to handle custom phrases
+  Future<String> _handleCustomPhrases(String userPrompt) async {
+    // List of custom phrases that should trigger a special response
+    List<String> triggerPhrases = [
+      "who are you",
+      "what's your name",
+      "do I know you",
+      "tell me about you",
+      "who is this",
+      "are you there",
+      "what's your purpose"
+    ];
+
+    // Check if the user's prompt contains any of the trigger phrases
+    for (var phrase in triggerPhrases) {
+      if (userPrompt.toLowerCase().contains(phrase)) {
+        return _getCustomResponse(phrase); // Return the appropriate custom response
+      }
+    }
+    return ''; // Return an empty string if no custom phrase is matched
+  }
+
+  // Method to return a custom response for certain phrases
+  String _getCustomResponse(String userPrompt) {
+    if (userPrompt.contains("who are you") || 
+        userPrompt.contains("what's your name") ||
+        userPrompt.contains("tell me about you")) {
+      return "I am EBY, your personal assistant!";
+    }
+    // You can add more custom responses for other phrases here
+    return "I'm here to assist you with any questions.";
+  }
+
+  // Method to clean response from Gemini
+  String cleanResponse(String response) {
+    // Remove double asterisks "**"
+    response = response.replaceAll('**', '');
+
+    // Remove triple backquotes (```), which could be part of a block
+    response = response.replaceAll(RegExp(r'```.*?```', dotAll: true), '');
+
+    return response;
   }
 }

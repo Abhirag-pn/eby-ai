@@ -1,37 +1,51 @@
+import 'dart:developer';
+
 import 'package:eby/utils/animationservice.dart';
+import 'package:eby/utils/sttservice.dart';
 import 'package:flutter_tts/flutter_tts.dart';
 import 'package:flutter/material.dart';
 
 class TtsService with ChangeNotifier {
   final FlutterTts _flutterTts = FlutterTts();
   bool isSpeaking = false;
+  String txt="";
 
   TtsService() {
 
 
      
     _flutterTts.setStartHandler(() {
+      log("Entering Start");
+      if(txt==""){
+        AnimationControllerService().triggerListenToSpeak();
+      }else{
+        AnimationControllerService().triggerSpeak();
+      }
       AnimationControllerService().triggerSpeak();
       isSpeaking = true;
       notifyListeners();
     });
 
-    _flutterTts.setCompletionHandler(() {
-      isSpeaking = false;
+    _flutterTts.setCompletionHandler(() async{
+      log("Entering Completion");
       AnimationControllerService().triggerIdle();
+      isSpeaking = false;
+      
       notifyListeners();
+      
     });
 
   
 
   _flutterTts.setCancelHandler(()
-  {
+  {log("Entering Canel");
     isSpeaking = false;
       AnimationControllerService().triggerIdle();
       notifyListeners();
   });
 
     _flutterTts.setErrorHandler((message) {
+      log("Entering Error");
       isSpeaking = false;
       AnimationControllerService().triggerIdle();
       notifyListeners();

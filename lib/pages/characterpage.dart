@@ -25,6 +25,14 @@ class _CharacterPageState extends State<CharacterPage> {
   }
 
   @override
+  void dispose() {
+    AnimationControllerService().dispose();
+    TtsService().dispose();
+    SpeechToTextService().dispose();
+    super.dispose();
+  }
+
+  @override
   Widget build(BuildContext context) {
     final speechService = Provider.of<SpeechToTextService>(context);
     final ttsService = Provider.of<TtsService>(context, listen: false);
@@ -46,50 +54,35 @@ class _CharacterPageState extends State<CharacterPage> {
             ),
             Align(
               alignment: Alignment.bottomCenter,
-              child: Column(
-                mainAxisAlignment: MainAxisAlignment.end,
-                children: [
-                  Text(
-                    speechService.isListening
-                        ? speechService.wordsSpoken
-                        : "Click on the microphone to start",
-                    style: Theme.of(context)
-                        .textTheme
-                        .labelLarge!
-                        .copyWith(color: Colors.black38,fontFamily: 'Bowl'),
-                  ),
-                  const SizedBox(height: 30),
-                  BouncingIconButton(
-                    button: speechService.isListening
-                        ? 'assets/images/listening.png'
-                        : 'assets/images/mic.png',
-                    action: () async {
-                      if (speechService.isListening) {
-                        
-                        await speechService.stopListening();
-                        await ttsService.stop();
-                      } else {
-                        ttsService.stop();
-                        final result = await speechService.startListening();
-                        if(result=="")
-                        {  
-                           await ttsService.speak("I didnt get you.try again!");
-                           
-
-                        }else{
-                        String? response =
-                            await GeminiService.instance.sendMessage(result!);
-                            if(response.isEmpty||response==""){
-                              response="I didnt get you.try again!";
-                            }else
-                            {
-                              await ttsService.speak(response);
-                            }
-                        
-                      }}
-                    },
-                  ),
-                ],
+              child: BouncingIconButton(
+                button: speechService.isListening
+                    ? 'assets/images/listening.png'
+                    : 'assets/images/mic.png',
+                action: () async {
+                  if (speechService.isListening) {
+                    
+                    await speechService.stopListening();
+                    await ttsService.stop();
+                  } else {
+                    ttsService.stop();
+                    final result = await speechService.startListening();
+                    if(result=="")
+                    {  
+                       await ttsService.speak("I didnt get you,try again!");
+                       
+              
+                    }else{
+                    String? response =
+                        await GeminiService.instance.sendMessage(result!);
+                        if(response.isEmpty||response==""){
+                          response="I didnt get you,try again!";
+                        }else
+                        {
+                          await ttsService.speak(response);
+                        }
+                    
+                  }}
+                },
               ),
             ),
             Padding(
@@ -99,6 +92,23 @@ class _CharacterPageState extends State<CharacterPage> {
               child: BouncingIconButton(button: 'assets/images/exiticon.png', action: (){
                 FirebaseAuth.instance.signOut();
               }),
+              ),
+              
+            ),
+            Padding(
+              
+              padding:  EdgeInsets.only(top: MediaQuery.of(context).size.height/7),
+              child: Align(
+                alignment: Alignment.topCenter,
+                child: Text(
+                      speechService.isListening
+                          ? speechService.wordsSpoken
+                          :speechService.speechEnabled?"Click on the microphone to start":"Unavailable",
+                      style: Theme.of(context)
+                          .textTheme
+                          .bodyLarge!
+                          .copyWith(color: Colors.black38,fontFamily: 'Bowl'),
+                    ),
               ),
             )
           ],
