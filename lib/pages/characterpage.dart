@@ -1,3 +1,4 @@
+import 'dart:async';
 import 'dart:developer';
 import 'package:eby/utils/animationservice.dart';
 import 'package:eby/utils/geminiservice.dart';
@@ -19,10 +20,17 @@ class CharacterPage extends StatefulWidget {
 }
 
 class _CharacterPageState extends State<CharacterPage> {
- 
+  bool _isLoading = true;
+
   @override
   void initState() {
     GeminiService().initialize();
+    Timer(const Duration(milliseconds: 1500), () {
+      setState(() {
+        _isLoading = false;
+      });
+      
+    });
     super.initState();
   }
 
@@ -54,76 +62,76 @@ class _CharacterPageState extends State<CharacterPage> {
                 AnimationControllerService().initializeController(artboard);
               },
             ),
-            Align(
-              alignment: Alignment.bottomCenter,
-              child: BouncingIconButton(
-                button: speechService.isListening
-                    ? 'assets/images/listening.png'
-                    : 'assets/images/mic.png',
-                action: () async {
-                  if (speechService.isListening) {
-                    
-                    await speechService.stopListening();
-                    await ttsService.stop();
-                  } else {
-                    ttsService.stop();
-                    final result = await speechService.startListening();
-                    if(result=="")
-                    {  
-                       await ttsService.speak("I didnt get you,try again!");
-                       
-              
-                    }else{
-                    String? response =
-                        await GeminiService.instance.sendMessage(result!);
-                        if(response.isEmpty||response==""){
-                          response="I didnt get you,try again!";
-                        }else
-                        {
+            Padding(
+              padding: const EdgeInsets.only(bottom: 15.0),
+              child: Align(
+                alignment: Alignment.bottomCenter,
+                child: BouncingIconButton(
+                  button: speechService.isListening
+                      ? 'assets/images/listening.png'
+                      : 'assets/images/mic.png',
+                  action: () async {
+                    if (speechService.isListening) {
+                      await speechService.stopListening();
+                      await ttsService.stop();
+                    } else {
+                      ttsService.stop();
+                      final result = await speechService.startListening();
+                      if (result == "") {
+                        await ttsService.speak("I didnt get you,try again!");
+                      } else {
+                        String? response =
+                            await GeminiService.instance.sendMessage(result!);
+                        if (response.isEmpty || response == "") {
+                          response = "I didnt get you,try again!";
+                        } else {
                           await ttsService.speak(response);
                         }
-                    
-                  }}
-                },
+                      }
+                    }
+                  },
+                ),
               ),
             ),
-           
             Padding(
-              
-              padding:  EdgeInsets.only(top: MediaQuery.of(context).size.height/7),
+              padding:
+                  EdgeInsets.only(top: MediaQuery.of(context).size.height / 7),
               child: Align(
                 alignment: Alignment.topCenter,
                 child: Text(
-                      speechService.isListening
-                          ? speechService.wordsSpoken
-                          :speechService.speechEnabled?"Click on the microphone to start":"Unavailable",
-                      style: Theme.of(context)
-                          .textTheme
-                          .bodyLarge!
-                          .copyWith(color: Colors.black38,fontFamily: 'Bowl'),
-                    ),
+                  speechService.isListening
+                      ? speechService.wordsSpoken
+                      : speechService.speechEnabled
+                          ? "Click on the microphone to start"
+                          : "Unavailable",
+                  style: Theme.of(context)
+                      .textTheme
+                      .bodyLarge!
+                      .copyWith(color: Colors.black38, fontFamily: 'Bowl'),
+                ),
               ),
             ),
-             Padding(
-              padding: const EdgeInsets.only(top: 20.0,right:10),
+            Padding(
+              padding: const EdgeInsets.only(top: 20.0, right: 10),
               child: Align(
-                alignment: Alignment.topRight,
-              child:SpeedDial(
-                backgroundColor: Colors.transparent,
-              
-                child:  BouncingIconButton(button: "assets/images/settingsicon.png", action: (){}),
-                overlayColor: Colors.black26,
-                direction: SpeedDialDirection.down,
-                children: [
-                  SpeedDialChild(
-                    backgroundColor: Colors.transparent,
-                     child: BouncingIconButton(button: "assets/images/exiticon.png", action: (){})
-                  )
-                ],
+                  alignment: Alignment.topRight,
+                  child: BouncingIconButton(button: 'assets/images/exiticon.png', action: (){
+                    FirebaseAuth.instance.signOut();})
+            ),),
+            if(_isLoading)Container(
+                decoration: BoxDecoration(color: Colors.amber),
+                height: double.infinity,
+                width: double.infinity,
+                child: Center(
+                  child: Text(
+                    "Loading...",
+                    style: Theme.of(context)
+                        .textTheme
+                        .displaySmall!
+                        .copyWith(color: Colors.white, fontFamily: 'Bowl'),
+                  ),
+                ),
               )
-              ),
-              
-            ),
           ],
         ),
       ),
