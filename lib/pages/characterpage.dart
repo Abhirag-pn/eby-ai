@@ -21,6 +21,7 @@ class CharacterPage extends StatefulWidget {
 
 class _CharacterPageState extends State<CharacterPage> {
   bool _isLoading = true;
+  bool studymode=false;
   ValueNotifier<bool> isDialOpen = ValueNotifier(false);
 
   @override
