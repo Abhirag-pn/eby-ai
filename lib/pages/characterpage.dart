@@ -21,6 +21,7 @@ class CharacterPage extends StatefulWidget {
 
 class _CharacterPageState extends State<CharacterPage> {
   bool _isLoading = true;
+  ValueNotifier<bool> isDialOpen = ValueNotifier(false);
 
   @override
   void initState() {
@@ -29,7 +30,6 @@ class _CharacterPageState extends State<CharacterPage> {
       setState(() {
         _isLoading = false;
       });
-      
     });
     super.initState();
   }
@@ -115,10 +115,64 @@ class _CharacterPageState extends State<CharacterPage> {
               padding: const EdgeInsets.only(top: 20.0, right: 10),
               child: Align(
                   alignment: Alignment.topRight,
-                  child: BouncingIconButton(button: 'assets/images/exiticon.png', action: (){
-                    FirebaseAuth.instance.signOut();})
-            ),),
-            if(_isLoading)Container(
+                  child: SpeedDial(
+                    spacing: 10,
+                    spaceBetweenChildren: 8,
+                    elevation: 2,
+                    activeBackgroundColor: Colors.transparent,
+                    backgroundColor: Colors.transparent,
+                    shape: const CircleBorder(),
+                    openCloseDial: isDialOpen,
+                    overlayColor: Colors.transparent,
+                    direction: SpeedDialDirection.down,
+                    buttonSize: const Size(70, 70),
+                    childrenButtonSize: const Size(70, 70),
+                    
+                    children: [
+                      SpeedDialChild(
+                        elevation: 2,
+                         shape: const CircleBorder(),
+                        backgroundColor: Colors.transparent,
+                        child: BouncingIconButton(
+                            button: "assets/images/graph.png",
+                            action: () {
+                               isDialOpen.value = !isDialOpen.value;
+                            }),
+                      ),
+                      SpeedDialChild(
+                         shape: const CircleBorder(),
+                        elevation: 2,
+                        backgroundColor: Colors.transparent,
+                        child: BouncingIconButton(
+                            button: "assets/images/exiticon.png",
+                            action: () {
+                               isDialOpen.value = !isDialOpen.value;
+                            }),
+                      ),
+                    ],
+                    renderOverlay: false,
+                    activeChild: BouncingIconButton(
+                        button: "assets/images/settingsicon.png",
+                        action: () {
+                          isDialOpen.value = !isDialOpen.value;
+                        }),
+                    child: BouncingIconButton(
+                        button: "assets/images/settingsicon.png",
+                        action: () {
+                          isDialOpen.value = !isDialOpen.value;
+                        }),
+                  )),
+            ),
+            Padding(
+              padding: const EdgeInsets.only(top: 20.0, left: 10),
+              child: Align(
+                alignment: Alignment.topLeft,
+                child: BouncingIconButton(
+                    button: 'assets/images/mode2.png', action: () {}),
+              ),
+            ),
+            if (_isLoading)
+              Container(
                 decoration: const BoxDecoration(color: Colors.black),
                 height: double.infinity,
                 width: double.infinity,

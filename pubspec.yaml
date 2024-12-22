@@ -49,6 +49,8 @@ dependencies:
   flutter_dotenv: ^5.2.1
   rive: ^0.13.19
   flutter_speed_dial: ^7.0.0
+  flutter_expandable_fab: ^2.3.0
+  grouped_action_buttons: ^0.0.4
 
 dev_dependencies:
   flutter_test:

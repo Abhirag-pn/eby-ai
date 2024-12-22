@@ -214,6 +214,14 @@ packages:
       url: "https://pub.dev"
     source: hosted
     version: "5.2.1"
+  flutter_expandable_fab:
+    dependency: "direct main"
+    description:
+      name: flutter_expandable_fab
+      sha256: "85275279d19faf4fbe5639dc1f139b4555b150e079d056f085601a45688af12c"
+      url: "https://pub.dev"
+    source: hosted
+    version: "2.3.0"
   flutter_lints:
     dependency: "direct dev"
     description:
@@ -320,6 +328,14 @@ packages:
       url: "https://pub.dev"
     source: hosted
     version: "2.3.2"
+  grouped_action_buttons:
+    dependency: "direct main"
+    description:
+      name: grouped_action_buttons
+      sha256: "18e7b9110b1e818d36f153d575fb01254e52b1c2f62d23b12d98ecf6620a3f11"
+      url: "https://pub.dev"
+    source: hosted
+    version: "0.0.4"
   http:
     dependency: transitive
     description:
