@@ -32,7 +32,7 @@ class ModelLoadPageState extends State<ModelLoadPage> {
       }
     }
     await FlutterGemmaPlugin.instance.init(
-      maxTokens: 512,
+      maxTokens: 300,
       temperature: 1.0,
       topK: 1,
       randomSeed: 1,

@@ -2,6 +2,7 @@ import 'dart:async';
 import 'dart:developer';
 import 'package:eby/utils/animationservice.dart';
 import 'package:eby/utils/geminiservice.dart';
+import 'package:eby/utils/gemmaservice.dart';
 import 'package:eby/widgets/bouncingiconbutton.dart';
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/material.dart';
@@ -74,25 +75,15 @@ class _CharacterPageState extends State<CharacterPage> {
                       ? 'assets/images/listening.png'
                       : 'assets/images/mic.png',
                   action: () async {
-                  // AnimationControllerService().triggerIdleToStudyIdle();
-                  // await Future.delayed(const Duration(seconds:3));
-                  // AnimationControllerService().triggerStudyListen();
-                  // await Future.delayed(const Duration(seconds:3));
-                  // AnimationControllerService().triggerStudyThink();
-                  // await Future.delayed(const Duration(seconds:3));
-                  // AnimationControllerService().triggerStudySpeak();
-                  // await Future.delayed(const Duration(seconds:3));
-                  // AnimationControllerService().triggerStudyIdle();
-                  // await Future.delayed(const Duration(seconds:3));
-                  // AnimationControllerService().triggerStudyIdleToIdle();
+
                    if(modeProvider.studyMode){
                      if (speechService.isListening) {
                       await speechService.stopListening();
                       await ttsService.stop();
                     } else {
                       ttsService.stop();
-                      final result = await speechService.startListening();
-                      AnimationControllerService().triggerListen();
+                      final result = await speechService.startListening(context);
+                      AnimationControllerService().triggerStudyListen();
                       if (result == "") {
                         await ttsService.speak("I didnt get you,try again!");
                       } else {
@@ -112,13 +103,13 @@ class _CharacterPageState extends State<CharacterPage> {
                       await ttsService.stop();
                     } else {
                       ttsService.stop();
-                      final result = await speechService.startListening();
-                      AnimationControllerService().triggerListen();
+                      final result = await speechService.startListening(context);
                       if (result == "") {
                         await ttsService.speak("I didnt get you,try again!");
                       } else {
                         String? response =
-                            await GeminiService.instance.sendMessage(result!);
+                            await GemmaService.instance.sendMessage(result!);
+                            log("Listened: $result");
                         if (response.isEmpty || response == "") {
                           response = "I didnt get you,try again!";
                         } else {

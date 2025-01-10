@@ -1,45 +1,27 @@
 import 'dart:developer';
+
 import 'package:eby/utils/animationservice.dart';
-import 'package:flutter_dotenv/flutter_dotenv.dart';
-import 'package:google_generative_ai/google_generative_ai.dart';
+import 'package:flutter_gemma/flutter_gemma.dart';
 
-class GeminiService {
-  late final GenerativeModel _model;
-  late final ChatSession _chatSession;
-  bool _isInitialized = false; // Flag to track initialization
+class GemmaService {
 
+late final gemmainstance=FlutterGemmaPlugin.instance;
   // Private constructor
-  GeminiService._private();
+  GemmaService._private();
 
   // Singleton instance
-  static final instance = GeminiService._private();
+  static final instance = GemmaService._private();
 
   // Factory constructor
-  factory GeminiService() => instance;
+  factory GemmaService() => instance;
 
-  Future<void> initialize() async {
-    if (_isInitialized) {
-      log("GeminiService is already initialized.");
-      return;
-    }
 
-    try {
-      _model = GenerativeModel(
-        model: 'gemini-1.5-flash',
-        apiKey: dotenv.get('API_KEY'),
-      );
 
-      _chatSession = _model.startChat();
-      _isInitialized = true; // Mark as initialized
-      log("GeminiService initialized successfully.");
-    } catch (e) {
-      log("Initialization Error: ${e.toString()}");
-      rethrow;
-    }
-  }
+
 
   Future<String> sendMessage(String userPrompt) async {
     try {
+      log("sending to gemmA");
       // Check if the user's prompt contains any custom phrases
       String response = await _handleCustomPhrases(userPrompt);
       if (response.isNotEmpty) {
@@ -47,16 +29,18 @@ class GeminiService {
       }
 
       // If not a custom phrase, forward the request to Gemini
-      AnimationControllerService().triggerStudyThink();
-      final geminiResponse = await _chatSession.sendMessage(Content.text(userPrompt,),);
-      log("Response from Gemini: ${geminiResponse.text!}");
+      AnimationControllerService().triggerThink();
+      
+String? gemmaresponse = await gemmainstance.getResponse(prompt:userPrompt);
+     
+      log("Response from Gemma: ${gemmaresponse!}");
 
       // Clean the response before returning
-      String cleanedResponse = cleanResponse(geminiResponse.text!);
+     
 
-      return cleanedResponse;
+      return gemmaresponse;
     } catch (e) {
-      AnimationControllerService().triggerStudyIdle();
+      AnimationControllerService().triggerIdle();
       log("Message Error: ${e.toString()}");
       return "Error: Unable to process your request.";
     }
@@ -98,13 +82,5 @@ class GeminiService {
   }
 
   // Method to clean response from Gemini
-  String cleanResponse(String response) {
-    // Remove double asterisks "**"
-    response = response.replaceAll('**', '');
 
-    // Remove triple backquotes (```), which could be part of a block
-    response = response.replaceAll(RegExp(r'```.*?```', dotAll: true), '');
-
-    return response;
-  }
 }

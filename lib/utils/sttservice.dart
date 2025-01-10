@@ -1,7 +1,9 @@
 import 'dart:async';
 import 'dart:developer';
-import 'package:eby/utils/animationservice.dart';
+import 'package:eby/utils/animationservice.dart';// Import ModeProvider
+import 'package:eby/utils/variablesprovider.dart';
 import 'package:flutter/material.dart';
+import 'package:provider/provider.dart';
 
 import 'package:speech_to_text/speech_recognition_error.dart';
 import 'package:speech_to_text/speech_recognition_result.dart';
@@ -12,12 +14,20 @@ class SpeechToTextService with ChangeNotifier {
   bool _speechEnabled = false;
   bool _isListening = false;
   String _wordsSpoken = '';
+  bool _studyMode = false; // Track the study mode state locally
+
   Completer<String>? _listeningCompleter;
   Timer? _listenTimeoutTimer;
 
   String get wordsSpoken => _wordsSpoken;
   bool get isListening => _isListening;
   bool get speechEnabled => _speechEnabled;
+
+  // Call this method to update study mode state
+  void updateStudyMode(bool studyMode) {
+    _studyMode = studyMode;
+    notifyListeners();
+  }
 
   Future<void> initialize() async {
     try {
@@ -32,8 +42,18 @@ class SpeechToTextService with ChangeNotifier {
     notifyListeners();
   }
 
-  Future<String?> startListening() async {
-    AnimationControllerService().triggerListen();
+  Future<String?> startListening(BuildContext context) async {
+    // Get study mode state from ModeProvider and update locally
+    final studyMode = Provider.of<ModeProvider>(context, listen: false).studyMode;
+    updateStudyMode(studyMode);
+
+    // Trigger appropriate animation
+    if (_studyMode) {
+      AnimationControllerService().triggerStudyListen();
+    } else {
+      AnimationControllerService().triggerListen();
+    }
+
     if (_listeningCompleter?.isCompleted == false) {
       _listeningCompleter = null; // Cancel any ongoing listening session
     }
@@ -47,16 +67,21 @@ class SpeechToTextService with ChangeNotifier {
         await _speechToText.listen(
           listenOptions: SpeechListenOptions(
             listenMode: ListenMode.dictation,
-           
           ),
-          onResult: _onSpeechResult,
+          onResult: (result) {
+            _onSpeechResult(result, _studyMode);
+          },
           listenFor: const Duration(seconds: 60),
           pauseFor: const Duration(seconds: 3),
         );
 
         _listenTimeoutTimer = Timer(const Duration(seconds: 60), () async {
           if (_isListening) {
-            AnimationControllerService().triggerIdle();
+            if (_studyMode) {
+              AnimationControllerService().triggerStudyIdle();
+            } else {
+              AnimationControllerService().triggerIdle();
+            }
             await stopListening();
           }
         });
@@ -69,7 +94,6 @@ class SpeechToTextService with ChangeNotifier {
         throw Exception("Failed to start speech recognition.");
       }
     } else if (_isListening) {
-    
       log("Already listening, stopping current session.");
       await stopListening();
       return null;
@@ -81,10 +105,16 @@ class SpeechToTextService with ChangeNotifier {
   Future<void> stopListening() async {
     if (_isListening) {
       _isListening = false;
-      AnimationControllerService().triggerIdle();
-      await _speechToText.stop();
 
+      if (_studyMode) {
+        AnimationControllerService().triggerStudyIdle();
+      } else {
+        AnimationControllerService().triggerIdle();
+      }
+
+      await _speechToText.stop();
       _listenTimeoutTimer?.cancel(); // Cancel the timeout timer
+
       if (_wordsSpoken.isEmpty && _listeningCompleter?.isCompleted == false) {
         _listeningCompleter?.complete("");
         log("No words recognized before stopping.");
@@ -93,11 +123,11 @@ class SpeechToTextService with ChangeNotifier {
       }
 
       notifyListeners(); // Update the UI when stopped
-     log("Stopped listening for speech.");
+      log("Stopped listening for speech.");
     }
   }
 
-  void _onSpeechResult(SpeechRecognitionResult result) async {
+  void _onSpeechResult(SpeechRecognitionResult result, bool? study) async {
     _wordsSpoken = result.recognizedWords;
     if (result.finalResult) {
       if (_listeningCompleter?.isCompleted == false) {
@@ -108,8 +138,12 @@ class SpeechToTextService with ChangeNotifier {
           _listeningCompleter?.complete(_wordsSpoken);
           log("Final result received: $_wordsSpoken");
         }
-        _isListening = false; // Update the listening state
-        AnimationControllerService().triggerIdle(); // Transition to idle
+        _isListening = false;
+        if (_studyMode) {
+          AnimationControllerService().triggerStudyIdle();
+        } else {
+          AnimationControllerService().triggerIdle();
+        }
         notifyListeners();
       }
     }
@@ -123,12 +157,20 @@ class SpeechToTextService with ChangeNotifier {
       log("Speech recognition stopped: ${error.errorMsg}");
       _wordsSpoken = "No words recognized.";
       _isListening = false;
-      AnimationControllerService().triggerIdle();
+
+      if (_studyMode) {
+        AnimationControllerService().triggerStudyIdle();
+      } else {
+        AnimationControllerService().triggerIdle();
+      }
       _listeningCompleter?.complete(""); // Return the default message
     } else {
-      // Handle other errors
       _isListening = false;
-      AnimationControllerService().triggerIdle();
+      if (_studyMode) {
+        AnimationControllerService().triggerStudyIdle();
+      } else {
+        AnimationControllerService().triggerIdle();
+      }
       _listeningCompleter?.complete("");
     }
 
@@ -139,7 +181,11 @@ class SpeechToTextService with ChangeNotifier {
     log("Speech recognition status: $status");
     if (status == "notListening") {
       _isListening = false;
-      AnimationControllerService().triggerIdle();
+      if (_studyMode) {
+        AnimationControllerService().triggerStudyIdle();
+      } else {
+        AnimationControllerService().triggerIdle();
+      }
       notifyListeners();
     }
   }
