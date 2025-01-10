@@ -11,6 +11,7 @@ import 'package:rive/rive.dart' as rive;
 
 import '../utils/sttservice.dart';
 import '../utils/ttsservice.dart';
+import '../utils/variablesprovider.dart';
 
 class CharacterPage extends StatefulWidget {
   const CharacterPage({super.key});
@@ -21,7 +22,7 @@ class CharacterPage extends StatefulWidget {
 
 class _CharacterPageState extends State<CharacterPage> {
   bool _isLoading = true;
-  bool studymode=false;
+  
   ValueNotifier<bool> isDialOpen = ValueNotifier(false);
 
   @override
@@ -47,6 +48,7 @@ class _CharacterPageState extends State<CharacterPage> {
   Widget build(BuildContext context) {
     final speechService = Provider.of<SpeechToTextService>(context);
     final ttsService = Provider.of<TtsService>(context, listen: false);
+    final modeProvider = Provider.of<ModeProvider>(context);
     return Scaffold(
       body: Container(
         decoration: const BoxDecoration(
@@ -72,12 +74,25 @@ class _CharacterPageState extends State<CharacterPage> {
                       ? 'assets/images/listening.png'
                       : 'assets/images/mic.png',
                   action: () async {
-                    if (speechService.isListening) {
+                  // AnimationControllerService().triggerIdleToStudyIdle();
+                  // await Future.delayed(const Duration(seconds:3));
+                  // AnimationControllerService().triggerStudyListen();
+                  // await Future.delayed(const Duration(seconds:3));
+                  // AnimationControllerService().triggerStudyThink();
+                  // await Future.delayed(const Duration(seconds:3));
+                  // AnimationControllerService().triggerStudySpeak();
+                  // await Future.delayed(const Duration(seconds:3));
+                  // AnimationControllerService().triggerStudyIdle();
+                  // await Future.delayed(const Duration(seconds:3));
+                  // AnimationControllerService().triggerStudyIdleToIdle();
+                   if(modeProvider.studyMode){
+                     if (speechService.isListening) {
                       await speechService.stopListening();
                       await ttsService.stop();
                     } else {
                       ttsService.stop();
                       final result = await speechService.startListening();
+                      AnimationControllerService().triggerListen();
                       if (result == "") {
                         await ttsService.speak("I didnt get you,try again!");
                       } else {
@@ -90,6 +105,29 @@ class _CharacterPageState extends State<CharacterPage> {
                         }
                       }
                     }
+                   }else
+                   {
+                     if (speechService.isListening) {
+                      await speechService.stopListening();
+                      await ttsService.stop();
+                    } else {
+                      ttsService.stop();
+                      final result = await speechService.startListening();
+                      AnimationControllerService().triggerListen();
+                      if (result == "") {
+                        await ttsService.speak("I didnt get you,try again!");
+                      } else {
+                        String? response =
+                            await GeminiService.instance.sendMessage(result!);
+                        if (response.isEmpty || response == "") {
+                          response = "I didnt get you,try again!";
+                        } else {
+                          await ttsService.speak(response);
+                        }
+                      }
+                    }
+                   }
+                   
                   },
                 ),
               ),
@@ -169,7 +207,19 @@ class _CharacterPageState extends State<CharacterPage> {
               child: Align(
                 alignment: Alignment.topLeft,
                 child: BouncingIconButton(
-                    button: 'assets/images/mode2.png', action: () {}),
+                    button: 'assets/images/mode2.png', action: () {
+                      setState(() {
+                        if(modeProvider.studyMode)
+                        {
+                          modeProvider.toggleMode();
+                          AnimationControllerService().triggerIdleToStudyIdle();
+                        }else
+                        {
+                          modeProvider.toggleMode();
+                          AnimationControllerService().triggerStudyIdleToIdle();
+                        }
+                      });
+                    }),
               ),
             ),
             if (_isLoading)

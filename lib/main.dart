@@ -1,9 +1,10 @@
 import 'package:eby/pages/characterpage.dart';
-import 'package:eby/pages/pageresolver.dart';
-import 'package:eby/pages/test.dart';
+import 'package:eby/pages/modelloadpage.dart';
+
 
 import 'package:eby/utils/sttservice.dart';
 import 'package:eby/utils/ttsservice.dart';
+import 'package:eby/utils/variablesprovider.dart';
 import 'package:firebase_core/firebase_core.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_dotenv/flutter_dotenv.dart';
@@ -18,6 +19,7 @@ void main()async {
       providers: [
         ChangeNotifierProvider(create: (_) => TtsService()..initialize()),
         ChangeNotifierProvider(create: (_) => SpeechToTextService()..initialize()),
+        ChangeNotifierProvider(create: (_)=>ModeProvider())
       ],
       child: const MyApp(),
     )
@@ -37,7 +39,7 @@ class MyApp extends StatelessWidget {
         colorScheme: ColorScheme.fromSeed(seedColor: Colors.deepPurple),
         useMaterial3: true,
       ),
-      home:  CharacterPage()
+      home:const  ModelLoadPage()
     );
   }
 }

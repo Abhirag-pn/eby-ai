@@ -51,6 +51,7 @@ dependencies:
   flutter_speed_dial: ^7.0.0
   flutter_expandable_fab: ^2.3.0
   grouped_action_buttons: ^0.0.4
+  flutter_gemma: ^0.4.2
 
 dev_dependencies:
   flutter_test:
@@ -80,6 +81,7 @@ flutter:
     - assets/images/
     - assets/sounds/
     - assets/rive/
+    - assets/
     - .env
   #   - images/a_dot_ham.jpeg
 
