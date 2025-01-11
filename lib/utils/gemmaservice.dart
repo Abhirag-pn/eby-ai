@@ -35,10 +35,10 @@ String? gemmaresponse = await gemmainstance.getResponse(prompt:userPrompt);
      
       log("Response from Gemma: ${gemmaresponse!}");
 
-      // Clean the response before returning
+     String cleaned=cleanResponseForTTS(gemmaresponse);// Clean the response before returning
      
-
-      return gemmaresponse;
+AnimationControllerService().triggerSpeak();
+      return cleaned;
     } catch (e) {
       AnimationControllerService().triggerIdle();
       log("Message Error: ${e.toString()}");
@@ -82,5 +82,16 @@ String? gemmaresponse = await gemmainstance.getResponse(prompt:userPrompt);
   }
 
   // Method to clean response from Gemini
+String cleanResponseForTTS(String response) {
+  // Remove emojis and special characters using a regular expression
+  String cleanedResponse = response.replaceAll(RegExp(r'[^\w\s.,!?]'), '');
 
+  // Replace multiple spaces with a single space
+  cleanedResponse = cleanedResponse.replaceAll(RegExp(r'\s+'), ' ');
+
+  // Trim leading and trailing spaces
+  cleanedResponse = cleanedResponse.trim();
+
+  return cleanedResponse;
+}
 }

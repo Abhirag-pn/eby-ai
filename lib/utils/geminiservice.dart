@@ -105,6 +105,8 @@ class GeminiService {
     // Remove triple backquotes (```), which could be part of a block
     response = response.replaceAll(RegExp(r'```.*?```', dotAll: true), '');
 
+AnimationControllerService().triggerStudySpeak();
     return response;
+    
   }
 }

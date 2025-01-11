@@ -68,9 +68,7 @@ class SpeechToTextService with ChangeNotifier {
           listenOptions: SpeechListenOptions(
             listenMode: ListenMode.dictation,
           ),
-          onResult: (result) {
-            _onSpeechResult(result, _studyMode);
-          },
+          onResult: _onSpeechResult,
           listenFor: const Duration(seconds: 60),
           pauseFor: const Duration(seconds: 3),
         );
@@ -127,7 +125,7 @@ class SpeechToTextService with ChangeNotifier {
     }
   }
 
-  void _onSpeechResult(SpeechRecognitionResult result, bool? study) async {
+  void _onSpeechResult(SpeechRecognitionResult result) async {
     _wordsSpoken = result.recognizedWords;
     if (result.finalResult) {
       if (_listeningCompleter?.isCompleted == false) {

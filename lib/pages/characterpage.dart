@@ -1,11 +1,13 @@
 import 'dart:async';
 import 'dart:developer';
+import 'dart:isolate';
 import 'package:eby/utils/animationservice.dart';
 import 'package:eby/utils/geminiservice.dart';
 import 'package:eby/utils/gemmaservice.dart';
 import 'package:eby/widgets/bouncingiconbutton.dart';
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/material.dart';
+import 'package:flutter_isolate/flutter_isolate.dart';
 import 'package:flutter_speed_dial/flutter_speed_dial.dart';
 import 'package:provider/provider.dart';
 import 'package:rive/rive.dart' as rive;
@@ -23,7 +25,8 @@ class CharacterPage extends StatefulWidget {
 
 class _CharacterPageState extends State<CharacterPage> {
   bool _isLoading = true;
-  
+  bool isSpeaking = false;
+
   ValueNotifier<bool> isDialOpen = ValueNotifier(false);
 
   @override
@@ -75,50 +78,73 @@ class _CharacterPageState extends State<CharacterPage> {
                       ? 'assets/images/listening.png'
                       : 'assets/images/mic.png',
                   action: () async {
+                    if (modeProvider.studyMode) {
+                      if (speechService.isListening) {
+                        await speechService.stopListening();
+                        await ttsService.stop();
+                      } else {
+                        setState(() {
+                            isSpeaking = true;
+                          });
+                        ttsService.stop();
+                        final result =
+                            await speechService.startListening(context);
+                        AnimationControllerService().triggerStudyListen();
+                        if (result == "") {
+                          
+                          await ttsService.speak("I didnt get you,try again!");
+                          setState(() {
+                            isSpeaking = false;
+                          });
+                        } else {
+                          String? response =
+                              await GeminiService.instance.sendMessage(result!);
+                          if (response.isEmpty || response == "") {
+                            response = "I didnt get you,try again!";
+                          } else {
+                            
+                            await ttsService.speak(response);
+                            setState(() {
+                              isSpeaking = false;
+                            });
+                          }
+                        }
+                      }
+                    } else {
+                      if (speechService.isListening) {
+                        await speechService.stopListening();
+                        await ttsService.stop();
+                      } else {
+                        setState(() {
+                            isSpeaking = true;
+                          });
+                        ttsService.stop();
+                        final result =
+                            await speechService.startListening(context);
+                        if (result == "") {
+                          
+                          await ttsService.speak("I didnt get you,try again!");
+                          setState(() {
+                            isSpeaking = false;
+                          });
+                        } else {
+                          final reciveport=ReceivePort();
+                          await FlutterIsolate.spawn(getGemmaResponse, ( result!,reciveport.sendPort));
+                          reciveport.listen((response) async {
+                           if (response.isEmpty || response == "") {
+                            response = "I didnt get you,try again!";
+                          } else {
+                            
+                            await ttsService.speak(response);
+                            setState(() {
+                              isSpeaking = false;
+                            });
+                          }
+                          });
 
-                   if(modeProvider.studyMode){
-                     if (speechService.isListening) {
-                      await speechService.stopListening();
-                      await ttsService.stop();
-                    } else {
-                      ttsService.stop();
-                      final result = await speechService.startListening(context);
-                      AnimationControllerService().triggerStudyListen();
-                      if (result == "") {
-                        await ttsService.speak("I didnt get you,try again!");
-                      } else {
-                        String? response =
-                            await GeminiService.instance.sendMessage(result!);
-                        if (response.isEmpty || response == "") {
-                          response = "I didnt get you,try again!";
-                        } else {
-                          await ttsService.speak(response);
                         }
                       }
                     }
-                   }else
-                   {
-                     if (speechService.isListening) {
-                      await speechService.stopListening();
-                      await ttsService.stop();
-                    } else {
-                      ttsService.stop();
-                      final result = await speechService.startListening(context);
-                      if (result == "") {
-                        await ttsService.speak("I didnt get you,try again!");
-                      } else {
-                        String? response =
-                            await GemmaService.instance.sendMessage(result!);
-                            log("Listened: $result");
-                        if (response.isEmpty || response == "") {
-                          response = "I didnt get you,try again!";
-                        } else {
-                          await ttsService.speak(response);
-                        }
-                      }
-                    }
-                   }
-                   
                   },
                 ),
               ),
@@ -157,26 +183,25 @@ class _CharacterPageState extends State<CharacterPage> {
                     direction: SpeedDialDirection.down,
                     buttonSize: const Size(70, 70),
                     childrenButtonSize: const Size(70, 70),
-                    
                     children: [
                       SpeedDialChild(
                         elevation: 2,
-                         shape: const CircleBorder(),
+                        shape: const CircleBorder(),
                         backgroundColor: Colors.transparent,
                         child: BouncingIconButton(
                             button: "assets/images/graph.png",
                             action: () {
-                               isDialOpen.value = !isDialOpen.value;
+                              isDialOpen.value = !isDialOpen.value;
                             }),
                       ),
                       SpeedDialChild(
-                         shape: const CircleBorder(),
+                        shape: const CircleBorder(),
                         elevation: 2,
                         backgroundColor: Colors.transparent,
                         child: BouncingIconButton(
                             button: "assets/images/exiticon.png",
                             action: () {
-                               isDialOpen.value = !isDialOpen.value;
+                              isDialOpen.value = !isDialOpen.value;
                             }),
                       ),
                     ],
@@ -198,18 +223,21 @@ class _CharacterPageState extends State<CharacterPage> {
               child: Align(
                 alignment: Alignment.topLeft,
                 child: BouncingIconButton(
-                    button: 'assets/images/mode2.png', action: () {
-                      setState(() {
-                        if(modeProvider.studyMode)
-                        {
-                          modeProvider.toggleMode();
-                          AnimationControllerService().triggerIdleToStudyIdle();
-                        }else
-                        {
-                          modeProvider.toggleMode();
-                          AnimationControllerService().triggerStudyIdleToIdle();
-                        }
-                      });
+                    button: 'assets/images/mode2.png',
+                    action: () {
+                      if (!isSpeaking) {
+                        setState(() {
+                          if (modeProvider.studyMode) {
+                            modeProvider.toggleMode();
+                            AnimationControllerService()
+                                .triggerStudyIdleToIdle();
+                          } else {
+                            modeProvider.toggleMode();
+                            AnimationControllerService()
+                                .triggerIdleToStudyIdle();
+                          }
+                        });
+                      }
                     }),
               ),
             ),
@@ -234,3 +262,11 @@ class _CharacterPageState extends State<CharacterPage> {
     );
   }
 }
+@pragma('vm:entry-point')
+ void getGemmaResponse(( String,SendPort)data)
+ async{
+  
+  
+ }
+
+

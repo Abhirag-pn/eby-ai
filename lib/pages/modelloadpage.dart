@@ -1,3 +1,5 @@
+import 'dart:developer';
+
 import 'package:eby/pages/characterpage.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_gemma/flutter_gemma.dart';
@@ -23,6 +25,7 @@ class ModelLoadPageState extends State<ModelLoadPage> {
   }
 
   Future<void> _initializeModel() async {
+    log('entering model load');
     bool isLoaded = await FlutterGemmaPlugin.instance.isLoaded;
     if (!isLoaded) {
       await for (int progress in FlutterGemmaPlugin.instance.loadAssetModelWithProgress(fullPath: 'model.bin')) {
@@ -32,13 +35,15 @@ class ModelLoadPageState extends State<ModelLoadPage> {
       }
     }
     await FlutterGemmaPlugin.instance.init(
-      maxTokens: 300,
-      temperature: 1.0,
+
+      maxTokens: 500,
+      temperature: 0.5,
       topK: 1,
       randomSeed: 1,
     );
     setState(() {
       _isModelInitialized = true;
+      log('model initialized');
     });
   }
 

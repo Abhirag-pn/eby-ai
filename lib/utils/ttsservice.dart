@@ -17,13 +17,13 @@ class TtsService with ChangeNotifier {
       log("Entering Start");
       bool studyMode = _getStudyMode();
       if (studyMode) {
-        if (txt=='') {
+        if (txt=="") {
           AnimationControllerService().triggerStudyListenToSpeak();
         } else {
           AnimationControllerService().triggerStudySpeak();
         }
       } else {
-        if (txt=='') {
+        if (txt=="") {
           AnimationControllerService().triggerListenToSpeak();
         } else {
           AnimationControllerService().triggerSpeak();
