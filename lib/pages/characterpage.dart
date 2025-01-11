@@ -128,20 +128,20 @@ class _CharacterPageState extends State<CharacterPage> {
                             isSpeaking = false;
                           });
                         } else {
-                          final reciveport=ReceivePort();
-                          await FlutterIsolate.spawn(getGemmaResponse, ( result!,reciveport.sendPort));
-                          reciveport.listen((response) async {
-                           if (response.isEmpty || response == "") {
-                            response = "I didnt get you,try again!";
-                          } else {
-                            
-                            await ttsService.speak(response);
+                        String? response =
+                            await GemmaService.instance.sendMessage(result!);
+                            log("Listened: $result");
+                        if (response.isEmpty || response == "") {
+                          response = "I didnt get you,try again!";
+                        } else {
                             setState(() {
-                              isSpeaking = false;
-                            });
-                          }
+                            isSpeaking = true;
                           });
-
+                          await ttsService.speak(response);
+                            setState(() {
+                            isSpeaking = false;
+                          });
+                        }
                         }
                       }
                     }
