@@ -19,19 +19,21 @@ class ModelService {
 
   Future<String> sendMessage(String text) async {
     AnimationControllerService().triggerThink();
- 
+    
     final request = GenerateCompletionRequest(
       model: 'ebychatbot', // Specify the model you want to use
       prompt: text,
       stream: false,
     );
+  
     try {
      
         final generated = await client.generateCompletion(request: request);
-        
+        await  Future.delayed(const Duration(milliseconds: 1)); 
       AnimationControllerService().triggerSpeak();
       return generated.response!;
     } catch (e) {
+      AnimationControllerService().triggerSpeak();
       log(e.toString());
       return "Error";
     }

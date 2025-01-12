@@ -37,32 +37,38 @@ class TtsService with ChangeNotifier {
       log("Entering Completion");
       bool studyMode = _getStudyMode();
       if (studyMode) {
+        await Future.delayed(const Duration(seconds: 0));
         AnimationControllerService().triggerStudyIdle();
       } else {
+        await Future.delayed(const Duration(seconds: 0));
         AnimationControllerService().triggerIdle();
       }
       isSpeaking = false;
       notifyListeners();
     });
-    _flutterTts.setCancelHandler(() {
+    _flutterTts.setCancelHandler(()async {
       log("Entering Cancel");
       isSpeaking = false;
       bool studyMode = _getStudyMode();
       if (studyMode) {
+        await Future.delayed(const Duration(seconds: 0));
         AnimationControllerService().triggerStudyIdle();
       } else {
+        await Future.delayed(const Duration(seconds: 0));
         AnimationControllerService().triggerIdle();
       }
       notifyListeners();
     });
 
-    _flutterTts.setErrorHandler((message) {
+    _flutterTts.setErrorHandler((message)async {
       log("Entering Error");
       isSpeaking = false;
       bool studyMode = _getStudyMode();
       if (studyMode) {
+        await Future.delayed(const Duration(seconds: 0));
         AnimationControllerService().triggerStudyIdle();
       } else {
+        await Future.delayed(const Duration(seconds: 0));
         AnimationControllerService().triggerIdle();
       }
       notifyListeners();
