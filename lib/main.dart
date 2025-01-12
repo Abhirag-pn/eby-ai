@@ -1,5 +1,5 @@
 import 'package:eby/pages/characterpage.dart';
-import 'package:eby/pages/modelloadpage.dart';
+
 
 
 import 'package:eby/utils/sttservice.dart';
@@ -39,7 +39,7 @@ class MyApp extends StatelessWidget {
         colorScheme: ColorScheme.fromSeed(seedColor: Colors.deepPurple),
         useMaterial3: true,
       ),
-      home:const  ModelLoadPage()
+      home:const  CharacterPage()
     );
   }
 }

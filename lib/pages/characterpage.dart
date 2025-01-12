@@ -3,7 +3,7 @@ import 'dart:developer';
 import 'dart:isolate';
 import 'package:eby/utils/animationservice.dart';
 import 'package:eby/utils/geminiservice.dart';
-import 'package:eby/utils/gemmaservice.dart';
+import 'package:eby/utils/modelservice.dart';
 import 'package:eby/widgets/bouncingiconbutton.dart';
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/material.dart';
@@ -128,8 +128,8 @@ class _CharacterPageState extends State<CharacterPage> {
                             isSpeaking = false;
                           });
                         } else {
-                        String? response =
-                            await GemmaService.instance.sendMessage(result!);
+                        String response =await ModelService().sendMessage(result!);
+                           log(response);
                             log("Listened: $result");
                         if (response.isEmpty || response == "") {
                           response = "I didnt get you,try again!";
@@ -190,8 +190,10 @@ class _CharacterPageState extends State<CharacterPage> {
                         backgroundColor: Colors.transparent,
                         child: BouncingIconButton(
                             button: "assets/images/graph.png",
-                            action: () {
+                            action: ()async {
                               isDialOpen.value = !isDialOpen.value;
+                             
+                             
                             }),
                       ),
                       SpeedDialChild(
@@ -262,11 +264,5 @@ class _CharacterPageState extends State<CharacterPage> {
     );
   }
 }
-@pragma('vm:entry-point')
- void getGemmaResponse(( String,SendPort)data)
- async{
-  
-  
- }
 
 
