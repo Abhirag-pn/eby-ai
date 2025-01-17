@@ -1,13 +1,16 @@
 import 'dart:async';
 import 'dart:developer';
-import 'dart:isolate';
+import 'package:eby/models/chatmodel.dart';
+import 'package:eby/models/chatsessionmodel.dart';
+import 'package:eby/pages/sessionpage.dart';
 import 'package:eby/utils/animationservice.dart';
+import 'package:eby/utils/databaseservice.dart';
 import 'package:eby/utils/geminiservice.dart';
 import 'package:eby/utils/modelservice.dart';
 import 'package:eby/widgets/bouncingiconbutton.dart';
-import 'package:firebase_auth/firebase_auth.dart';
+import 'package:eby/widgets/sessionwidget.dart';
 import 'package:flutter/material.dart';
-import 'package:flutter_isolate/flutter_isolate.dart';
+
 import 'package:flutter_speed_dial/flutter_speed_dial.dart';
 import 'package:provider/provider.dart';
 import 'package:rive/rive.dart' as rive;
@@ -24,13 +27,23 @@ class CharacterPage extends StatefulWidget {
 }
 
 class _CharacterPageState extends State<CharacterPage> {
+  bool _sessionCreated = false;
   bool _isLoading = true;
+  String? sessionID;
   bool isSpeaking = false;
-
+  List<ChatModel> messages = [];
   ValueNotifier<bool> isDialOpen = ValueNotifier(false);
+
+  Future<void> _getSession() async {
+    sessionID = await DatabaseService.saveChatSession();
+  }
 
   @override
   void initState() {
+    if(!_sessionCreated){
+      _getSession();
+    }
+    
     GeminiService().initialize();
     Timer(const Duration(milliseconds: 1500), () {
       setState(() {
@@ -45,6 +58,8 @@ class _CharacterPageState extends State<CharacterPage> {
     AnimationControllerService().dispose();
     TtsService().stop();
     SpeechToTextService().dispose();
+    log("code run");
+
     super.dispose();
   }
 
@@ -82,27 +97,35 @@ class _CharacterPageState extends State<CharacterPage> {
                       if (speechService.isListening) {
                         await speechService.stopListening();
                         await ttsService.stop();
+                        AnimationControllerService().triggerStudyIdle();
                       } else {
                         setState(() {
-                            isSpeaking = true;
-                          });
+                          isSpeaking = true;
+                        });
                         ttsService.stop();
                         final result =
                             await speechService.startListening(context);
                         AnimationControllerService().triggerStudyListen();
                         if (result == "") {
-                          
                           await ttsService.speak("I didnt get you,try again!");
                           setState(() {
                             isSpeaking = false;
                           });
                         } else {
+                          messages
+                              .add(ChatModel(role: 'user', message: result!));
+                          DatabaseService.addMessageToSession(sessionID!,
+                              ChatModel(role: 'user', message: result));
                           String? response =
-                              await GeminiService.instance.sendMessage(result!);
+                              await GeminiService.instance.sendMessage(result);
+                          messages
+                              .add(ChatModel(role: 'eby', message: response));
+                          DatabaseService.addMessageToSession(sessionID!,
+                              ChatModel(role: 'eby', message: response));
+                          log(messages.toString());
                           if (response.isEmpty || response == "") {
                             response = "I didnt get you,try again!";
                           } else {
-                            
                             await ttsService.speak(response);
                             setState(() {
                               isSpeaking = false;
@@ -114,34 +137,44 @@ class _CharacterPageState extends State<CharacterPage> {
                       if (speechService.isListening) {
                         await speechService.stopListening();
                         await ttsService.stop();
+                        AnimationControllerService().triggerIdle();
                       } else {
                         setState(() {
-                            isSpeaking = true;
-                          });
+                          isSpeaking = true;
+                        });
                         ttsService.stop();
                         final result =
                             await speechService.startListening(context);
                         if (result == "") {
-                          
                           await ttsService.speak("I didnt get you,try again!");
                           setState(() {
                             isSpeaking = false;
                           });
                         } else {
-                        String response =await ModelService().sendMessage(result!);
-                           log(response);
-                            log("Listened: $result");
-                        if (response.isEmpty || response == "") {
-                          response = "I didnt get you,try again!";
-                        } else {
+                          messages
+                              .add(ChatModel(role: 'user', message: result!));
+                          DatabaseService.addMessageToSession(sessionID!,
+                              ChatModel(role: 'user', message: result));
+                          String response =
+                              await ModelService().sendMessage(result);
+                          messages
+                              .add(ChatModel(role: 'eby', message: response));
+                          DatabaseService.addMessageToSession(sessionID!,
+                              ChatModel(role: 'eby', message: response));
+                          log(response);
+                          log("Listened: $result");
+                          if (response.isEmpty || response == "") {
+                            response = "I didnt get you,try again!";
+                          } else {
                             setState(() {
-                            isSpeaking = true;
-                          });
-                          await ttsService.speak(response);
+                              isSpeaking = true;
+                            });
+                            await ttsService.speak(response);
+                            AnimationControllerService().triggerIdle();
                             setState(() {
-                            isSpeaking = false;
-                          });
-                        }
+                              isSpeaking = false;
+                            });
+                          }
                         }
                       }
                     }
@@ -190,10 +223,17 @@ class _CharacterPageState extends State<CharacterPage> {
                         backgroundColor: Colors.transparent,
                         child: BouncingIconButton(
                             button: "assets/images/graph.png",
-                            action: ()async {
+                            action: () async {
                               isDialOpen.value = !isDialOpen.value;
-                             
-                             
+                              log(messages.toString());
+                              showDialog(
+                                  context: context,
+                                  builder: (context) {
+                                    return const Scaffold(
+                                      body:  SessionPage(),
+                                      backgroundColor: Colors.transparent,
+                                    );
+                                  });
                             }),
                       ),
                       SpeedDialChild(
@@ -264,5 +304,3 @@ class _CharacterPageState extends State<CharacterPage> {
     );
   }
 }
-
-

@@ -1,11 +1,15 @@
 import 'dart:developer';
 
+import 'package:eby/models/chatsessionmodel.dart';
 import 'package:eby/utils/authservice.dart';
+import 'package:eby/utils/databaseservice.dart';
+import 'package:eby/utils/variablesprovider.dart';
 import 'package:eby/widgets/bouncingiconbutton.dart';
 import 'package:eby/widgets/bouncingtextbutton.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:logger/web.dart';
+import 'package:provider/provider.dart';
 
 import '../utils/audiohelper.dart';
 
@@ -24,6 +28,12 @@ class _MainMenuState extends State<MainMenu> with WidgetsBindingObserver {
     }
     if (state == AppLifecycleState.resumed) {
       AudioHelper.instance.resumeMusic();
+    }
+    if (state == AppLifecycleState.detached){
+      
+      //  Databaseservice.saveMessage(ChatSessionModel(
+      //     sessionDate: DateTime.now(),
+      //     messages: Provider.of<ModeProvider>(context).messages));
     }
     super.didChangeAppLifecycleState(state);
   }
@@ -46,10 +56,15 @@ class _MainMenuState extends State<MainMenu> with WidgetsBindingObserver {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      
         backgroundColor: Colors.lightBlueAccent,
         body: Container(
-          decoration: const BoxDecoration(image: DecorationImage(image: AssetImage('assets/images/bg.jpg',),fit: BoxFit.cover),),
+          decoration: const BoxDecoration(
+            image: DecorationImage(
+                image: AssetImage(
+                  'assets/images/bg.jpg',
+                ),
+                fit: BoxFit.cover),
+          ),
           child: Stack(children: [
             const SizedBox(),
             Column(

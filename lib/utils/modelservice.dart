@@ -6,7 +6,7 @@ import 'package:ollama_dart/ollama_dart.dart';
 
 class ModelService {
   // Flag to track initialization
-  final client = OllamaClient(baseUrl: 'http://192.168.18.61:11434/api');
+  final client = OllamaClient(baseUrl: 'http://192.0.0.2:11434/api');
   // Private constructor
   ModelService._private();
 

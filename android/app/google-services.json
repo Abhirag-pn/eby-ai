@@ -14,11 +14,11 @@
       },
       "oauth_client": [
         {
-          "client_id": "967740494664-jbmc3q4crir7tv0oq21aj16kjf196kb7.apps.googleusercontent.com",
+          "client_id": "967740494664-7jtsiitrbq1nhulv1s7qeemrgan3nif6.apps.googleusercontent.com",
           "client_type": 1,
           "android_info": {
             "package_name": "eby.ai",
-            "certificate_hash": "1161cd50cadad34518f48ddb8d482992e4d43e33"
+            "certificate_hash": "65c6f2cd45d4321910cabe5d2ae08e964fcd5a29"
           }
         },
         {

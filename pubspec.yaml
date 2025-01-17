@@ -51,9 +51,10 @@ dependencies:
   flutter_speed_dial: ^7.0.0
   flutter_expandable_fab: ^2.3.0
   grouped_action_buttons: ^0.0.4
-  flutter_gemma: ^0.4.2
-  flutter_isolate: ^2.1.0
   ollama_dart: ^0.2.2+1
+  json_annotation: ^4.9.0
+  cloud_firestore: ^5.6.1
+  intl: ^0.20.1
 
 dev_dependencies:
   flutter_test:
