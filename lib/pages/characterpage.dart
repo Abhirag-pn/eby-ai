@@ -222,7 +222,7 @@ class _CharacterPageState extends State<CharacterPage> {
                         shape: const CircleBorder(),
                         backgroundColor: Colors.transparent,
                         child: BouncingIconButton(
-                            button: "assets/images/graph.png",
+                            button: "assets/images/chat.png",
                             action: () async {
                               isDialOpen.value = !isDialOpen.value;
                               log(messages.toString());
@@ -234,6 +234,16 @@ class _CharacterPageState extends State<CharacterPage> {
                                       backgroundColor: Colors.transparent,
                                     );
                                   });
+                            }),
+                      ),
+                      SpeedDialChild(
+                        shape: const CircleBorder(),
+                        elevation: 2,
+                        backgroundColor: Colors.transparent,
+                        child: BouncingIconButton(
+                            button: "assets/images/game.png",
+                            action: () {
+                              isDialOpen.value = !isDialOpen.value;
                             }),
                       ),
                       SpeedDialChild(
