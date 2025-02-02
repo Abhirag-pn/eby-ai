@@ -1,6 +1,6 @@
-import 'package:eby/pages/characterpage.dart';
+
+import 'package:eby/games/flappybot.dart';
 import 'package:eby/pages/pageresolver.dart';
-import 'package:eby/pages/sessionpage.dart';
 
 
 
@@ -8,6 +8,7 @@ import 'package:eby/utils/sttservice.dart';
 import 'package:eby/utils/ttsservice.dart';
 import 'package:eby/utils/variablesprovider.dart';
 import 'package:firebase_core/firebase_core.dart';
+import 'package:flame/game.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_dotenv/flutter_dotenv.dart';
 import 'package:provider/provider.dart';
@@ -41,9 +42,26 @@ class MyApp extends StatelessWidget {
         colorScheme: ColorScheme.fromSeed(seedColor: Colors.deepPurple),
         useMaterial3: true,
       ),
-      home:const  CharacterPage()
+      home:const  PageResolver()
     );
   }
 }
+
+class MyApp2 extends StatelessWidget {
+  const MyApp2({super.key});
+
+  @override
+  Widget build(BuildContext context) {
+    return MaterialApp(
+      debugShowCheckedModeBanner: false,
+      home: GameWidget(
+        game: FlappyBotGame(parentContext: context),
+      ),
+    );
+  }
+}
+
+
+
 
 

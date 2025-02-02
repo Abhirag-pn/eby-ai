@@ -1,14 +1,14 @@
 import 'dart:async';
 import 'dart:developer';
 import 'package:eby/models/chatmodel.dart';
-import 'package:eby/models/chatsessionmodel.dart';
+import 'package:eby/pages/choosegamepage.dart';
+import 'package:eby/pages/quizqpage.dart';
 import 'package:eby/pages/sessionpage.dart';
 import 'package:eby/utils/animationservice.dart';
 import 'package:eby/utils/databaseservice.dart';
 import 'package:eby/utils/geminiservice.dart';
 import 'package:eby/utils/modelservice.dart';
 import 'package:eby/widgets/bouncingiconbutton.dart';
-import 'package:eby/widgets/sessionwidget.dart';
 import 'package:flutter/material.dart';
 
 import 'package:flutter_speed_dial/flutter_speed_dial.dart';
@@ -27,7 +27,7 @@ class CharacterPage extends StatefulWidget {
 }
 
 class _CharacterPageState extends State<CharacterPage> {
-  bool _sessionCreated = false;
+  bool sessionCreated = false;
   bool _isLoading = true;
   String? sessionID;
   bool isSpeaking = false;
@@ -35,15 +35,21 @@ class _CharacterPageState extends State<CharacterPage> {
   ValueNotifier<bool> isDialOpen = ValueNotifier(false);
 
   Future<void> _getSession() async {
-    sessionID = await DatabaseService.saveChatSession();
+    try {
+      sessionID = await DatabaseService.saveChatSession();
+      sessionCreated = true;
+    } catch (e) {
+      log(e.toString());
+      sessionCreated = false;
+    }
   }
 
   @override
   void initState() {
-    if(!_sessionCreated){
+    if (sessionCreated == false) {
       _getSession();
     }
-    
+
     GeminiService().initialize();
     Timer(const Duration(milliseconds: 1500), () {
       setState(() {
@@ -227,13 +233,13 @@ class _CharacterPageState extends State<CharacterPage> {
                               isDialOpen.value = !isDialOpen.value;
                               log(messages.toString());
                               showDialog(
-                                  context: context,
-                                  builder: (context) {
-                                    return const Scaffold(
-                                      body:  SessionPage(),
-                                      backgroundColor: Colors.transparent,
-                                    );
-                                  });
+                                context: context,
+                                builder: (context) => const Dialog(
+                                  backgroundColor: Colors
+                                      .transparent, // Make dialog background transparent
+                                  child: SessionPage(), // Your existing UI
+                                ),
+                              );
                             }),
                       ),
                       SpeedDialChild(
@@ -244,6 +250,28 @@ class _CharacterPageState extends State<CharacterPage> {
                             button: "assets/images/game.png",
                             action: () {
                               isDialOpen.value = !isDialOpen.value;
+                              showDialog(
+                                context: context,
+                                builder: (context) => const Dialog(
+                                  backgroundColor: Colors
+                                      .transparent, // Make dialog background transparent
+                                  child: ChooseGameScreen(), // Your existing UI
+                                ),
+                              );
+                            }),
+                      ),
+                      SpeedDialChild(
+                        shape: const CircleBorder(),
+                        elevation: 2,
+                        backgroundColor: Colors.transparent,
+                        child: BouncingIconButton(
+                            button: "assets/images/quiz.png",
+                            action: () {
+                              isDialOpen.value = !isDialOpen.value;
+                              Navigator.push(
+                                  context,
+                                  MaterialPageRoute(
+                                      builder: (context) => const QuizPage()));
                             }),
                       ),
                       SpeedDialChild(

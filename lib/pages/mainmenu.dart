@@ -1,15 +1,10 @@
 import 'dart:developer';
-
-import 'package:eby/models/chatsessionmodel.dart';
 import 'package:eby/utils/authservice.dart';
-import 'package:eby/utils/databaseservice.dart';
-import 'package:eby/utils/variablesprovider.dart';
 import 'package:eby/widgets/bouncingiconbutton.dart';
 import 'package:eby/widgets/bouncingtextbutton.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:logger/web.dart';
-import 'package:provider/provider.dart';
 
 import '../utils/audiohelper.dart';
 

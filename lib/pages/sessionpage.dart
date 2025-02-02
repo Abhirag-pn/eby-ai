@@ -25,7 +25,7 @@ class _SessionPageState extends State<SessionPage> {
         .collection('chats')
         .doc(sessionID)
         .collection('messages')
-        .orderBy('timestamp', descending: false) // Ensure messages are in order
+        .orderBy('timestamp', descending: true) // Ensure messages are in order
 
         .get();
 
@@ -52,26 +52,8 @@ class _SessionPageState extends State<SessionPage> {
 
   @override
   Widget build(BuildContext context) {
-    return Container(
-      margin: const EdgeInsets.all(10),
-      padding: const EdgeInsets.only(top: 40, bottom: 10, left: 20, right: 20),
-      decoration: const BoxDecoration(
-          image: DecorationImage(
-              image: AssetImage('assets/images/chatbg.png'), fit: BoxFit.fill)),
-      child: Column(
-        children: [
-          Text(
-            "Sessions",
-            style: Theme.of(context)
-                .textTheme
-                .titleLarge!
-                .copyWith(color: Colors.white, fontFamily: 'Bowl'),
-          ),
-          SizedBox(
-            height: MediaQuery.of(context).size.height / 1.4,
-            width: double.maxFinite,
-            child: FutureBuilder(
-                future: DatabaseService.getChatSessions(),
+    return  FutureBuilder(
+                future: DatabaseService.fetchSessions(),
                 builder: (context, snapshot) {
                   if (snapshot.connectionState == ConnectionState.waiting) {
                     return const Center(child: CircularProgressIndicator(color: Colors.white,));
@@ -83,9 +65,45 @@ class _SessionPageState extends State<SessionPage> {
 
                   final sessions = snapshot.data!;
 
-                  return Column(
-                    children: [
-                      Expanded(
+                  return Container(
+     decoration: BoxDecoration(
+      borderRadius: BorderRadius.circular(50),
+      border: Border.all(color: Colors.white, width: 5),
+     ),
+      child: ClipRRect(
+        borderRadius: BorderRadius.circular(40),
+        child: Scaffold(
+          backgroundColor: Colors.green, // Full-screen background
+          body: Padding(
+            padding: const EdgeInsets.all(20),
+            child: Column(
+              mainAxisSize: MainAxisSize.min,
+              children: [
+                Row(
+                  mainAxisAlignment: MainAxisAlignment.center,
+                  children: [
+                   
+              Text(
+                "Sessions",
+                style: Theme.of(context)
+                    .textTheme
+                    .titleLarge!
+                    .copyWith(color: Colors.white, fontFamily: 'Bowl'),
+              ), 
+              const SizedBox(width: 20),
+               GestureDetector(
+                onTap: () {
+                  Navigator.pop(context);
+                },
+                child: const Icon(Icons.close,color: Colors.white,))  ],
+                ),
+                const Divider(color: Colors.white,thickness: 3,),
+               const SizedBox(
+                  height: 10,
+                ),
+                Container(
+                
+                   child:    Expanded(
                         child: ListView.builder(
                           
                           itemCount: sessions.length,
@@ -98,12 +116,18 @@ class _SessionPageState extends State<SessionPage> {
                           },
                         ),
                       ),
-                    ],
-                  );
-                }),
+                )]
+            ),
           ),
-        ],
+        ),
       ),
     );
+                });
   }
 }
+
+
+
+
+
+   

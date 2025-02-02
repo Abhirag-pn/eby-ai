@@ -1,12 +1,10 @@
 import 'dart:developer';
 import 'package:eby/utils/animationservice.dart';
-import 'package:flutter_dotenv/flutter_dotenv.dart';
-import 'package:google_generative_ai/google_generative_ai.dart';
 import 'package:ollama_dart/ollama_dart.dart';
 
 class ModelService {
   // Flag to track initialization
-  final client = OllamaClient(baseUrl: 'http://192.0.0.2:11434/api');
+  final client = OllamaClient(baseUrl: 'http://192.168.246.75:11434/api');
   // Private constructor
   ModelService._private();
 
@@ -31,7 +29,8 @@ class ModelService {
         final generated = await client.generateCompletion(request: request);
         await  Future.delayed(const Duration(milliseconds: 1)); 
       AnimationControllerService().triggerSpeak();
-      return generated.response!;
+      String cleanedResponse = cleanText(generated.response!);
+      return cleanedResponse;
     } catch (e) {
       AnimationControllerService().triggerSpeak();
       log(e.toString());
@@ -41,4 +40,8 @@ class ModelService {
 }
 
   // Method to return a custom response for certain phrases
- 
+ String cleanText(String input) {
+  // Use a regular expression to remove asterisks, bullets, and extra spaces
+  String cleanedText = input.replaceAll(RegExp(r'[*•]+'), '').trim();
+  return cleanedText;
+}

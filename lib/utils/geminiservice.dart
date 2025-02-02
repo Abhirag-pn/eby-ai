@@ -109,4 +109,46 @@ AnimationControllerService().triggerStudySpeak();
     return response;
     
   }
+
+
+  Future<List<Map<String, dynamic>>> generateQuizQuestions(String topic) async {
+  final prompt = """
+  Create a quiz on the topic "$topic". Provide 5 questions with four options each (A, B, C, D) and indicate the correct answer for each.
+  Format:
+  Q1: <question>
+  Options:
+  A) <option A>
+  B) <option B>
+  C) <option C>
+  D) <option D>
+  Answer: <option>) <correct answer>
+  Q2: ...
+  """;
+
+  final response = await sendMessage(prompt);
+  log("initial: $response");
+  final questionRegex = RegExp(
+    r"Q\d+: (.*)\nOptions:\nA\) (.*)\nB\) (.*)\nC\) (.*)\nD\) (.*)\nAnswer: (.*)",
+    multiLine: true,
+  );
+
+  final matches = questionRegex.allMatches(response);
+  if (matches.isEmpty) {
+    throw Exception("Failed to parse quiz questions from the response.");
+  }
+
+  return matches.map((match) {
+    return {
+      "question": match.group(1)?.trim(),
+      "options": [
+        match.group(2)?.trim(),
+        match.group(3)?.trim(),
+        match.group(4)?.trim(),
+        match.group(5)?.trim(),
+      ],
+      "answer": match.group(6)?.trim(),
+    };
+  }).toList();
+}
+
 }

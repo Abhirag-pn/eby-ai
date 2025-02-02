@@ -84,8 +84,6 @@ class TtsService with ChangeNotifier {
 
   Future<void> speak(String text) async {
     log('speak');
-    
-    bool studyMode = _getStudyMode();
 
     await _flutterTts.stop();
     await _flutterTts.speak(text);
