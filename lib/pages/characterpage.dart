@@ -9,6 +9,7 @@ import 'package:eby/utils/databaseservice.dart';
 import 'package:eby/utils/geminiservice.dart';
 import 'package:eby/utils/modelservice.dart';
 import 'package:eby/widgets/bouncingiconbutton.dart';
+import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/material.dart';
 
 import 'package:flutter_speed_dial/flutter_speed_dial.dart';
@@ -31,6 +32,7 @@ class _CharacterPageState extends State<CharacterPage> {
   bool _isLoading = true;
   String? sessionID;
   bool isSpeaking = false;
+  bool isThinking = false;
   List<ChatModel> messages = [];
   ValueNotifier<bool> isDialOpen = ValueNotifier(false);
 
@@ -92,17 +94,23 @@ class _CharacterPageState extends State<CharacterPage> {
             ),
             Padding(
               padding: const EdgeInsets.only(bottom: 15.0),
-              child: Align(
+              child:isThinking?null: Align(
                 alignment: Alignment.bottomCenter,
                 child: BouncingIconButton(
-                  button: speechService.isListening
-                      ? 'assets/images/listening.png'
+                  button: speechService.isListening&&!isSpeaking
+                      ? 'assets/images/listening.png':isSpeaking&&!speechService.isListening?'assets/images/stop.png'
                       : 'assets/images/mic.png',
                   action: () async {
                     if (modeProvider.studyMode) {
-                      if (speechService.isListening) {
+                      if (speechService.isListening&&!isSpeaking) {
                         await speechService.stopListening();
                         await ttsService.stop();
+                        AnimationControllerService().triggerStudyIdle();
+                      }else if(isSpeaking&&!speechService.isListening){
+                        await ttsService.stop();
+                        setState(() {
+                          isSpeaking = false;
+                        });
                         AnimationControllerService().triggerStudyIdle();
                       } else {
                         setState(() {
@@ -118,6 +126,7 @@ class _CharacterPageState extends State<CharacterPage> {
                             isSpeaking = false;
                           });
                         } else {
+                          if (result != null) {
                           messages
                               .add(ChatModel(role: 'user', message: result!));
                           DatabaseService.addMessageToSession(sessionID!,
@@ -133,18 +142,27 @@ class _CharacterPageState extends State<CharacterPage> {
                             response = "I didnt get you,try again!";
                           } else {
                             await ttsService.speak(response);
+                          
+                          }}
+                          AnimationControllerService().triggerStudyIdle();
                             setState(() {
                               isSpeaking = false;
                             });
-                          }
+                          //todo
                         }
                       }
                     } else {
-                      if (speechService.isListening) {
+                      if (speechService.isListening&&!isSpeaking) {
                         await speechService.stopListening();
                         await ttsService.stop();
                         AnimationControllerService().triggerIdle();
-                      } else {
+                      } else if(isSpeaking&&!speechService.isListening){
+                        await ttsService.stop();
+                        setState(() {
+                          isSpeaking = false;
+                        });
+                        AnimationControllerService().triggerIdle();
+                      }else {
                         setState(() {
                           isSpeaking = true;
                         });
@@ -157,6 +175,7 @@ class _CharacterPageState extends State<CharacterPage> {
                             isSpeaking = false;
                           });
                         } else {
+                          if(result!=null){
                           messages
                               .add(ChatModel(role: 'user', message: result!));
                           DatabaseService.addMessageToSession(sessionID!,
@@ -176,6 +195,7 @@ class _CharacterPageState extends State<CharacterPage> {
                               isSpeaking = true;
                             });
                             await ttsService.speak(response);
+                          }
                             AnimationControllerService().triggerIdle();
                             setState(() {
                               isSpeaking = false;
@@ -281,6 +301,7 @@ class _CharacterPageState extends State<CharacterPage> {
                         child: BouncingIconButton(
                             button: "assets/images/exiticon.png",
                             action: () {
+                              FirebaseAuth.instance.signOut();
                               isDialOpen.value = !isDialOpen.value;
                             }),
                       ),

@@ -2,28 +2,25 @@ import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:eby/models/chatmodel.dart';
 import 'package:eby/models/chatsessionmodel.dart';
 import 'package:firebase_auth/firebase_auth.dart';
-// Ensure both models are imported
 
 class DatabaseService {
   final FirebaseFirestore firestore = FirebaseFirestore.instance;
 
-  // Save a new chat session (creates a document in the 'chats' collection)
   static Future<String> saveChatSession() async {
     final chatDocRef = FirebaseFirestore.instance
         .collection('users')
         .doc(FirebaseAuth.instance.currentUser!.uid)
         .collection('chats')
-        .doc(); // Auto-generate the session ID
+        .doc();
 
     await chatDocRef.set({
       'id': chatDocRef.id,
-      'sessionDate': FieldValue.serverTimestamp(), // Firestore Timestamp
+      'sessionDate': FieldValue.serverTimestamp(),
     });
 
-    return chatDocRef.id; // Return the session ID for further operations
+    return chatDocRef.id;
   }
 
-  // Add a message to the 'messages' subcollection for a specific chat session
   static Future<void> addMessageToSession(
       String sessionId, ChatModel chatModel) async {
     final messagesRef = FirebaseFirestore.instance
@@ -40,7 +37,6 @@ class DatabaseService {
     });
   }
 
-  // Fetch all chat sessions for the current user
   static Future<List<ChatSessionModel>> fetchSessions() async {
     final snapshot = await FirebaseFirestore.instance
         .collection('users')
@@ -50,7 +46,7 @@ class DatabaseService {
         .get();
 
     if (snapshot.docs.isEmpty) {
-      return []; // Return empty list if no data
+      return [];
     }
 
     return snapshot.docs.map((doc) {
@@ -58,14 +54,13 @@ class DatabaseService {
       return ChatSessionModel(
         id: data['id'],
         sessionDate: (data['sessionDate'] is Timestamp)
-            ? (data['sessionDate'] as Timestamp).toDate() // Convert Timestamp to DateTime
+            ? (data['sessionDate'] as Timestamp).toDate()
             : DateTime.tryParse(data['sessionDate']) ?? DateTime.now(),
-        messages: [], // Messages are not fetched here
+        messages: [],
       );
     }).toList();
   }
 
-  // Fetch all messages for a specific chat session
   static Future<List<ChatModel>> getMessagesForSession(String sessionId) async {
     final snapshot = await FirebaseFirestore.instance
         .collection('users')
@@ -77,7 +72,7 @@ class DatabaseService {
         .get();
 
     if (snapshot.docs.isEmpty) {
-      return []; // Return empty list if no messages
+      return [];
     }
 
     return snapshot.docs.map((doc) {

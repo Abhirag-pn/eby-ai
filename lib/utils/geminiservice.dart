@@ -6,15 +6,12 @@ import 'package:google_generative_ai/google_generative_ai.dart';
 class GeminiService {
   late final GenerativeModel _model;
   late final ChatSession _chatSession;
-  bool _isInitialized = false; // Flag to track initialization
+  bool _isInitialized = false;
 
-  // Private constructor
   GeminiService._private();
 
-  // Singleton instance
   static final instance = GeminiService._private();
 
-  // Factory constructor
   factory GeminiService() => instance;
 
   Future<void> initialize() async {
@@ -30,7 +27,7 @@ class GeminiService {
       );
 
       _chatSession = _model.startChat();
-      _isInitialized = true; // Mark as initialized
+      _isInitialized = true;
       log("GeminiService initialized successfully.");
     } catch (e) {
       log("Initialization Error: ${e.toString()}");
@@ -40,18 +37,19 @@ class GeminiService {
 
   Future<String> sendMessage(String userPrompt) async {
     try {
-      // Check if the user's prompt contains any custom phrases
       String response = await _handleCustomPhrases(userPrompt);
       if (response.isNotEmpty) {
-        return response; // Return custom response without sending to Gemini
+        return response;
       }
 
-      // If not a custom phrase, forward the request to Gemini
       AnimationControllerService().triggerStudyThink();
-      final geminiResponse = await _chatSession.sendMessage(Content.text(userPrompt,),);
+      final geminiResponse = await _chatSession.sendMessage(
+        Content.text(
+          userPrompt,
+        ),
+      );
       log("Response from Gemini: ${geminiResponse.text!}");
 
-      // Clean the response before returning
       String cleanedResponse = cleanResponse(geminiResponse.text!);
 
       return cleanedResponse;
@@ -62,9 +60,7 @@ class GeminiService {
     }
   }
 
-  // Method to handle custom phrases
   Future<String> _handleCustomPhrases(String userPrompt) async {
-    // List of custom phrases that should trigger a special response
     List<String> triggerPhrases = [
       "who are you",
       "what's your name",
@@ -77,42 +73,35 @@ class GeminiService {
       "your name"
     ];
 
-    // Check if the user's prompt contains any of the trigger phrases
     for (var phrase in triggerPhrases) {
       if (userPrompt.toLowerCase().contains(phrase)) {
-        return _getCustomResponse(phrase); // Return the appropriate custom response
+        return _getCustomResponse(phrase);
       }
     }
-    return ''; // Return an empty string if no custom phrase is matched
+    return '';
   }
 
-  // Method to return a custom response for certain phrases
   String _getCustomResponse(String userPrompt) {
-    if (userPrompt.contains("who are you") || 
+    if (userPrompt.contains("who are you") ||
         userPrompt.contains("what's your name") ||
         userPrompt.contains("tell me about you")) {
       return "I am EBY, your personal assistant!";
     }
-    // You can add more custom responses for other phrases here
+
     return "I am EBY,I'm here to assist you with any questions.";
   }
 
-  // Method to clean response from Gemini
   String cleanResponse(String response) {
-    // Remove double asterisks "**"
     response = response.replaceAll('**', '');
 
-    // Remove triple backquotes (```), which could be part of a block
     response = response.replaceAll(RegExp(r'```.*?```', dotAll: true), '');
 
-AnimationControllerService().triggerStudySpeak();
+    AnimationControllerService().triggerStudySpeak();
     return response;
-    
   }
 
-
   Future<List<Map<String, dynamic>>> generateQuizQuestions(String topic) async {
-  final prompt = """
+    final prompt = """
   Create a quiz on the topic "$topic". Provide 5 questions with four options each (A, B, C, D) and indicate the correct answer for each.
   Format:
   Q1: <question>
@@ -125,30 +114,29 @@ AnimationControllerService().triggerStudySpeak();
   Q2: ...
   """;
 
-  final response = await sendMessage(prompt);
-  log("initial: $response");
-  final questionRegex = RegExp(
-    r"Q\d+: (.*)\nOptions:\nA\) (.*)\nB\) (.*)\nC\) (.*)\nD\) (.*)\nAnswer: (.*)",
-    multiLine: true,
-  );
+    final response = await sendMessage(prompt);
+    log("initial: $response");
+    final questionRegex = RegExp(
+      r"Q\d+: (.*)\nOptions:\nA\) (.*)\nB\) (.*)\nC\) (.*)\nD\) (.*)\nAnswer: (.*)",
+      multiLine: true,
+    );
 
-  final matches = questionRegex.allMatches(response);
-  if (matches.isEmpty) {
-    throw Exception("Failed to parse quiz questions from the response.");
+    final matches = questionRegex.allMatches(response);
+    if (matches.isEmpty) {
+      throw Exception("Failed to parse quiz questions from the response.");
+    }
+
+    return matches.map((match) {
+      return {
+        "question": match.group(1)?.trim(),
+        "options": [
+          match.group(2)?.trim(),
+          match.group(3)?.trim(),
+          match.group(4)?.trim(),
+          match.group(5)?.trim(),
+        ],
+        "answer": match.group(6)?.trim(),
+      };
+    }).toList();
   }
-
-  return matches.map((match) {
-    return {
-      "question": match.group(1)?.trim(),
-      "options": [
-        match.group(2)?.trim(),
-        match.group(3)?.trim(),
-        match.group(4)?.trim(),
-        match.group(5)?.trim(),
-      ],
-      "answer": match.group(6)?.trim(),
-    };
-  }).toList();
-}
-
 }

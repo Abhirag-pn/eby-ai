@@ -1,6 +1,6 @@
 import 'dart:async';
 import 'dart:developer';
-import 'package:eby/utils/animationservice.dart';// Import ModeProvider
+import 'package:eby/utils/animationservice.dart';
 import 'package:eby/utils/variablesprovider.dart';
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
@@ -14,7 +14,7 @@ class SpeechToTextService with ChangeNotifier {
   bool _speechEnabled = false;
   bool _isListening = false;
   String _wordsSpoken = '';
-  bool _studyMode = false; // Track the study mode state locally
+  bool _studyMode = false;
 
   Completer<String>? _listeningCompleter;
   Timer? _listenTimeoutTimer;
@@ -23,7 +23,6 @@ class SpeechToTextService with ChangeNotifier {
   bool get isListening => _isListening;
   bool get speechEnabled => _speechEnabled;
 
-  // Call this method to update study mode state
   void updateStudyMode(bool studyMode) {
     _studyMode = studyMode;
     notifyListeners();
@@ -43,11 +42,10 @@ class SpeechToTextService with ChangeNotifier {
   }
 
   Future<String?> startListening(BuildContext context) async {
-    // Get study mode state from ModeProvider and update locally
-    final studyMode = Provider.of<ModeProvider>(context, listen: false).studyMode;
+    final studyMode =
+        Provider.of<ModeProvider>(context, listen: false).studyMode;
     updateStudyMode(studyMode);
 
-    // Trigger appropriate animation
     if (_studyMode) {
       AnimationControllerService().triggerStudyListen();
     } else {
@@ -55,7 +53,7 @@ class SpeechToTextService with ChangeNotifier {
     }
 
     if (_listeningCompleter?.isCompleted == false) {
-      _listeningCompleter = null; // Cancel any ongoing listening session
+      _listeningCompleter = null;
     }
 
     if (_speechEnabled && !_isListening) {
@@ -111,7 +109,7 @@ class SpeechToTextService with ChangeNotifier {
       }
 
       await _speechToText.stop();
-      _listenTimeoutTimer?.cancel(); // Cancel the timeout timer
+      _listenTimeoutTimer?.cancel();
 
       if (_wordsSpoken.isEmpty && _listeningCompleter?.isCompleted == false) {
         _listeningCompleter?.complete("");
@@ -120,7 +118,7 @@ class SpeechToTextService with ChangeNotifier {
         _listeningCompleter?.complete(_wordsSpoken);
       }
 
-      notifyListeners(); // Update the UI when stopped
+      notifyListeners();
       log("Stopped listening for speech.");
     }
   }
@@ -145,13 +143,14 @@ class SpeechToTextService with ChangeNotifier {
         notifyListeners();
       }
     }
-    notifyListeners(); // Update UI with recognized words
+    notifyListeners();
   }
 
   void _onSpeechError(SpeechRecognitionError error) {
     log("Speech recognition error: ${error.errorMsg} (Permanent: ${error.permanent})");
 
-    if (error.errorMsg == "error_speech_timeout" || error.errorMsg == "No words recognized.") {
+    if (error.errorMsg == "error_speech_timeout" ||
+        error.errorMsg == "No words recognized.") {
       log("Speech recognition stopped: ${error.errorMsg}");
       _wordsSpoken = "No words recognized.";
       _isListening = false;
@@ -161,7 +160,7 @@ class SpeechToTextService with ChangeNotifier {
       } else {
         AnimationControllerService().triggerIdle();
       }
-      _listeningCompleter?.complete(""); // Return the default message
+      _listeningCompleter?.complete("");
     } else {
       _isListening = false;
       if (_studyMode) {
@@ -172,7 +171,7 @@ class SpeechToTextService with ChangeNotifier {
       _listeningCompleter?.complete("");
     }
 
-    notifyListeners(); // Ensure UI updates
+    notifyListeners();
   }
 
   void _onSpeechStatus(String status) {
@@ -190,12 +189,12 @@ class SpeechToTextService with ChangeNotifier {
 
   void clearLastWords() {
     _wordsSpoken = '';
-    notifyListeners(); // Clear words and update UI
+    notifyListeners();
   }
 
   @override
   void dispose() {
-    _listenTimeoutTimer?.cancel(); // Cancel the timer when disposed
+    _listenTimeoutTimer?.cancel();
     super.dispose();
   }
 }
