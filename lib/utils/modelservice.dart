@@ -1,47 +1,45 @@
-import 'dart:developer';
+
+  import 'dart:developer';
 import 'package:eby/utils/animationservice.dart';
 import 'package:ollama_dart/ollama_dart.dart';
 
 class ModelService {
-  // Flag to track initialization
-  final client = OllamaClient(baseUrl: 'http://192.168.18.66:11434/api');
-  // Private constructor
+  final client = OllamaClient(baseUrl: 'http://192.168.18.69:11434/api');
+
   ModelService._private();
-
-  // Singleton instance
   static final instance = ModelService._private();
-
-  // Factory constructor
   factory ModelService() => instance;
 
-
   Future<String> sendMessage(String text) async {
+    await Future.delayed(Duration(milliseconds: 200)); 
     AnimationControllerService().triggerThink();
     
+    await Future.delayed(Duration(milliseconds: 200)); // Ensure UI updates
+
     final request = GenerateCompletionRequest(
-      model: 'ebychatbot', // Specify the model you want to use
+      model: 'ebychatbot', 
       prompt: text,
       stream: false,
     );
-  
+
     try {
-     
-        final generated = await client.generateCompletion(request: request);
-        await  Future.delayed(const Duration(milliseconds: 1)); 
+      log("Sending request to Ollama...");
+      final generated = await client.generateCompletion(request: request);
+      log("Response from Ollama: ${generated.response}");
+
+      await Future.delayed(Duration(milliseconds: 100)); 
+      
       AnimationControllerService().triggerSpeak();
       String cleanedResponse = cleanText(generated.response!);
       return cleanedResponse;
     } catch (e) {
-      AnimationControllerService().triggerSpeak();
-      log(e.toString());
+      AnimationControllerService().triggerIdle(); // Reset to idle on error
+      log("Error in ModelService: $e");
       return "Error";
     }
   }
-}
 
-  // Method to return a custom response for certain phrases
- String cleanText(String input) {
-  // Use a regular expression to remove asterisks, bullets, and extra spaces
-  String cleanedText = input.replaceAll(RegExp(r'[*•]+'), '').trim();
-  return cleanedText;
+  String cleanText(String input) {
+    return input.replaceAll(RegExp(r'[*•]+'), '').trim();
+  }
 }
