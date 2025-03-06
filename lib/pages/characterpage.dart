@@ -145,14 +145,14 @@ class _CharacterPageState extends State<CharacterPage> {
                                 });
                               } else {
                                 if (result != null) {
-                                  setState(() {
-                                    isThinking = true;
-                                  });
                                   messages.add(ChatModel(
                                       role: 'user', message: result!));
                                   DatabaseService.addMessageToSession(
                                       sessionID!,
                                       ChatModel(role: 'user', message: result));
+                                  setState(() {
+                                    isThinking = true;
+                                  });
                                   String? response = await GeminiService
                                       .instance
                                       .sendMessage(result);
@@ -162,21 +162,13 @@ class _CharacterPageState extends State<CharacterPage> {
                                       sessionID!,
                                       ChatModel(
                                           role: 'eby', message: response));
+                                  setState(() {
+                                    isThinking = false;
+                                  });
                                   log(messages.toString());
                                   if (response.isEmpty || response == "") {
-                                    setState(() {
-                                      isThinking = false;
-                                    });
                                     response = "I didnt get you,try again!";
-                                    AnimationControllerService()
-                                        .triggerStudySpeak();
-                                    await ttsService.speak(response);
                                   } else {
-                                    setState(() {
-                                      isThinking = false;
-                                    });
-                                    AnimationControllerService()
-                                        .triggerStudySpeak();
                                     await ttsService.speak(response);
                                   }
                                 }
@@ -184,6 +176,7 @@ class _CharacterPageState extends State<CharacterPage> {
                                 setState(() {
                                   isSpeaking = false;
                                 });
+                                //todo
                               }
                             }
                           } else {
@@ -203,53 +196,49 @@ class _CharacterPageState extends State<CharacterPage> {
                                 isSpeaking = true;
                               });
                               ttsService.stop();
-
                               final result =
                                   await speechService.startListening(context);
                               AnimationControllerService().triggerListen();
-
-                              if (result == null || result.isEmpty) {
+                              if (result == "") {
                                 await ttsService
-                                    .speak("I didn't get you, try again!");
+                                    .speak("I didnt get you,try again!");
                                 setState(() {
                                   isSpeaking = false;
                                 });
                               } else {
-                                AnimationControllerService().triggerThink();
-                                setState(() {
-                                  isThinking = true;
-                                });
-
-                                messages.add(
-                                    ChatModel(role: 'user', message: result));
-                                DatabaseService.addMessageToSession(sessionID!,
-                                    ChatModel(role: 'user', message: result));
-
-                                String response =
-                                    await ModelService().sendMessage(result);
-
-                                if (response.isEmpty) {
-                                  response = "I didn't get you, try again!";
+                                if (result != null) {
+                                  messages.add(ChatModel(
+                                      role: 'user', message: result!));
+                                  DatabaseService.addMessageToSession(
+                                      sessionID!,
+                                      ChatModel(role: 'user', message: result));
+                                  setState(() {
+                                    isThinking = true;
+                                  });
+                                  String? response = await ModelService
+                                      .instance
+                                      .sendMessage(result);
+                                  messages.add(ChatModel(
+                                      role: 'eby', message: response));
+                                  DatabaseService.addMessageToSession(
+                                      sessionID!,
+                                      ChatModel(
+                                          role: 'eby', message: response));
+                                  setState(() {
+                                    isThinking = false;
+                                  });
+                                  log(messages.toString());
+                                  if (response.isEmpty || response == "") {
+                                    response = "I didnt get you,try again!";
+                                  } else {
+                                    await ttsService.speak(response);
+                                  }
                                 }
-
-                                setState(() {
-                                  isThinking = false;
-                                });
-
-                                messages.add(
-                                    ChatModel(role: 'eby', message: response));
-                                DatabaseService.addMessageToSession(sessionID!,
-                                    ChatModel(role: 'eby', message: response));
-
-                                log(response);
-                                log("Listened: $result");
-
-                                AnimationControllerService().triggerSpeak();
-                                await ttsService.speak(response);
-
+                                AnimationControllerService().triggerIdle();
                                 setState(() {
                                   isSpeaking = false;
                                 });
+                                //todo
                               }
                             }
                           }

@@ -4,7 +4,7 @@ import 'package:eby/utils/animationservice.dart';
 import 'package:ollama_dart/ollama_dart.dart';
 
 class ModelService {
-  final client = OllamaClient(baseUrl: 'http://192.168.18.69:11434/api');
+  final client = OllamaClient(baseUrl: 'http://192.168.43.202:11434/api');
 
   ModelService._private();
   static final instance = ModelService._private();
@@ -35,7 +35,7 @@ class ModelService {
     } catch (e) {
       AnimationControllerService().triggerIdle(); // Reset to idle on error
       log("Error in ModelService: $e");
-      return "Error";
+      return "Error"+e.toString();
     }
   }
 
